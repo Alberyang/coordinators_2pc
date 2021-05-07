@@ -18,7 +18,7 @@ public class TransferMessage implements Serializable {
     private String from; //表明传递双方的角色
     private String to; // 名称
     private String msg; // 控制台日志
-    private String port;
+    private Integer port;
 
     public Stage getStage() {
         return stage;
@@ -60,11 +60,11 @@ public class TransferMessage implements Serializable {
         this.msg = msg;
     }
 
-    public String getPort() {
+    public Integer getPort() {
         return port;
     }
 
-    public void setPort(String port) {
+    public void setPort(Integer port) {
         this.port = port;
     }
 }

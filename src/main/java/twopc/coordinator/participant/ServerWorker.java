@@ -74,6 +74,9 @@ public class ServerWorker {
         if(transferMessage.getStage().getCode()==1){
             //数据库本地执行 不提交
             System.out.println(" Current stage is "+ transferMessage.getStage());
+            if(transferMessage.getPort()==9001){
+
+            }
 
         } else if(transferMessage.getStage().getCode() == 4){
             // globle commit
