@@ -34,8 +34,9 @@ public class ServerWorker {
         try{
             inputStream = coConection.getInputStream();
             inputStreamReader = new InputStreamReader(inputStream);
-             bufferedReader = new BufferedReader(inputStreamReader);
+            bufferedReader = new BufferedReader(inputStreamReader);
             StringBuilder msg = new StringBuilder();
+
 //            while ((temp = bufferedReader.readLine()) != null) {
 //                info.append(temp);
 //                System.out.println("server accept connection");
@@ -66,10 +67,20 @@ public class ServerWorker {
     }
     public void responseTransferMessage(Socket coConection,TransferMessage transferMessage){
         //相应协调者
-//        try {
+        try {
+            System.out.println("ready to send to coordinator");
+            OutputStream outputStream = coConection.getOutputStream();
+            PrintWriter printWriter = new PrintWriter(outputStream);
+            printWriter.print(JSONObject.toJSONString(transferMessage));
+            printWriter.flush();
+            coConection.shutdownOutput();
+            System.out.println("send to coordinator done");
+            printWriter.close();
+            outputStream.close();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
 
-//        }
-        //关闭输出流
     }
     public void work(){
         this.transferMessage = this.readTransferMessage(this.coConnection);
