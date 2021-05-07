@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
 public enum Stage {
     INIT(0),
     VOTE_REQUEST(1),
@@ -22,5 +20,10 @@ public enum Stage {
     public int getCode() {
         return code;
     }
+
+    Stage(int code) {
+        this.code = code;
+    }
+
 
 }
