@@ -20,7 +20,7 @@ public class DbUtils {
         String user = pros.getProperty("user");
         String password = pros.getProperty("password");
         String url = pros.getProperty("url");
-        String driver = pros.getProperty("driverClass");
+        String driver = pros.getProperty("driver");
 
         Connection conn = null;
         try {
@@ -39,7 +39,8 @@ public class DbUtils {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println();
+    public static void main(String[] args) throws IOException {
+
+        System.out.println(getConnection());
     }
 }
