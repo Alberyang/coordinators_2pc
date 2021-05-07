@@ -10,15 +10,25 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransferMessage implements Serializable {
+    private static final long serialVersionUID = -5809782578272943999L;
     // 9000 协调者服务器
     // 9001 订单服务器
     // 9002 库存服务器
+    private String id;
     private Stage stage;
     private ShoppingCart cart; // 购物车里的商品
     private String from; //表明传递双方的角色
     private String to; // 名称
     private String msg; // 控制台日志
     private Integer port;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public Stage getStage() {
         return stage;

@@ -5,7 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import twopc.coordinator.common.Stage;
 import twopc.coordinator.common.TransferMessage;
+import twopc.coordinator.dao.SqlService;
+import twopc.coordinator.dao.SqlServiceImpl;
 
 import java.io.*;
 import java.net.Socket;
@@ -70,40 +73,76 @@ public class ServerWorker {
     }
     public void work(){
         this.transferMessage = this.readTransferMessage(this.coConnection);
+        Integer port = transferMessage.getPort();
+        SqlServiceImpl sqlService = new SqlServiceImpl(sqlConnection,transferMessage);
         //first phase: vote-request
         if(transferMessage.getStage().getCode()==1){
             //数据库本地执行 不提交
-            System.out.println(" Current stage is "+ transferMessage.getStage());
-            if(transferMessage.getPort()==9001){
-
+            System.out.println("Current stage is "+ transferMessage.getStage());
+            System.out.println("Receiving message from coordinator "+ transferMessage.getMsg());
+            try{
+//                sqlService.saveLog(transferMessage.getPort());
+                if(port==9001){
+                    sqlService.placeOrder();
+                }
+                if(port==9002){
+                    sqlService.delteInventory();
+                }
+                transferMessage.setStage(Stage.VOTE_COMMIT);
+                transferMessage.setMsg("This server votes commit to coordinator");
+            }catch (Exception e){
+                //response
+                transferMessage.setMsg("Local Transaction execution fails");
+                transferMessage.setStage(Stage.VOTE_ABORT);
+            }finally {
+                this.responseTransferMessage(this.coConnection,transferMessage);
             }
 
         } else if(transferMessage.getStage().getCode() == 4){
             // globle commit
             // 数据库提交
             // 更新数据库日志表
+            System.out.println("Current stage is "+ transferMessage.getStage());
+            System.out.println("Receiving message from coordinator "+ transferMessage.getMsg());
             try {
-                this.sqlConnection.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
+                if(sqlConnection!=null){
+                    this.sqlConnection.commit();
+                    this.sqlConnection.close();
+                    transferMessage.setMsg("This database commit successully");
+                    transferMessage.setStage(Stage.COMMIT_SUCCESS);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+                transferMessage.setMsg("Database commit fails");
+                transferMessage.setStage(Stage.ABORT);
             }
-            // 返回执行结果并返回给协调者
-            transferMessage.setMsg("order database commit successully");
-            this.responseTransferMessage(coConnection,transferMessage);
+            finally {
+                // 返回执行结果并返回给协调者
+                this.responseTransferMessage(coConnection,transferMessage);
+            }
+
 
         }else if(transferMessage.getStage().getCode() == 5){
             // globle rollback阶段
             // 本地数据库rollback
+            System.out.println("Current stage is "+ transferMessage.getStage());
+            System.out.println("Receiving message from coordinator "+ transferMessage.getMsg());
             try {
                 //数据库回滚
-//                this.sqlConnection.rollback();
+                this.sqlConnection.rollback();
                 //记录日志
                 this.sqlConnection.close();
                 // 返回执行结果并返回给协调者
-                transferMessage.setMsg("order database rollback successfully");
-                this.responseTransferMessage(coConnection,transferMessage);
+                transferMessage.setMsg("This database rollback successfully");
+                // 回复进入初始化阶段 等待重新整个服务
+                transferMessage.setStage(Stage.INIT);
+
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
+                transferMessage.setMsg("This database rollback fails");
+                transferMessage.setStage(Stage.ABORT);
+            }finally {
+                this.responseTransferMessage(coConnection,transferMessage);
             }
 
         }
