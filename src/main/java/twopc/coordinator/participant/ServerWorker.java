@@ -14,13 +14,14 @@ import java.sql.SQLException;
 
 @Data
 @NoArgsConstructor
-public class OrderServerWorker extends Thread{
+public class ServerWorker {
     private TransferMessage transferMessage;
-    private Socket coConection;
+    private Socket coConnection;
     private Connection sqlConnection;
-    public OrderServerWorker(Socket coConection,Connection sqlConnection){
+    public ServerWorker(Socket coConection, Connection sqlConnection){
         this.sqlConnection = sqlConnection;
-        this.coConection = coConection;
+        this.coConnection = coConection;
+
     }
 
     public TransferMessage readTransferMessage(Socket coConection){
@@ -67,11 +68,12 @@ public class OrderServerWorker extends Thread{
 //        }
         //关闭输出流
     }
-    public void run(){
-        this.transferMessage = this.readTransferMessage(this.coConection);
+    public void work(){
+        this.transferMessage = this.readTransferMessage(this.coConnection);
         //first phase: vote-request
         if(transferMessage.getStage().getCode()==1){
             //数据库本地执行 不提交
+            System.out.println(" Current stage is "+ transferMessage.getStage());
 
         } else if(transferMessage.getStage().getCode() == 4){
             // globle commit
@@ -84,7 +86,7 @@ public class OrderServerWorker extends Thread{
             }
             // 返回执行结果并返回给协调者
             transferMessage.setMsg("order database commit successully");
-            this.responseTransferMessage(coConection,transferMessage);
+            this.responseTransferMessage(coConnection,transferMessage);
 
         }else if(transferMessage.getStage().getCode() == 5){
             // globle rollback阶段
@@ -96,17 +98,11 @@ public class OrderServerWorker extends Thread{
                 this.sqlConnection.close();
                 // 返回执行结果并返回给协调者
                 transferMessage.setMsg("order database rollback successfully");
-                this.responseTransferMessage(coConection,transferMessage);
+                this.responseTransferMessage(coConnection,transferMessage);
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
 
-        }
-        // 关闭socket连接
-        try {
-            coConection.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

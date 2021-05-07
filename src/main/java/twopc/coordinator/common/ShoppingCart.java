@@ -23,4 +23,12 @@ public class ShoppingCart {
     void buyImac(Integer num){
         this.cart.put("imac",num);
     }
+
+    public HashMap<String, Integer> getCart() {
+        return cart;
+    }
+
+    public void setCart(HashMap<String, Integer> cart) {
+        this.cart = cart;
+    }
 }
