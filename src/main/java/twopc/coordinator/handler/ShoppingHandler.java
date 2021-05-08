@@ -120,9 +120,9 @@ public class ShoppingHandler extends AbstractHandler {
         // Process Shopping Cart
         ShoppingCart cart = new ShoppingCart();
         cart.setCart(new HashMap<String, Integer>());
-        cart.buyIphone(jsonData.getIntValue("Iphone"));
-        cart.buyImac(jsonData.getIntValue("Imac"));
-        cart.buyIpad(jsonData.getIntValue("Ipad"));
+        cart.buyiPhone(jsonData.getIntValue("iPhone"));
+        cart.buyiMac(jsonData.getIntValue("iMac"));
+        cart.buyiPad(jsonData.getIntValue("iPad"));
 
         // Set Transaction Message
         message.setStage(stage);

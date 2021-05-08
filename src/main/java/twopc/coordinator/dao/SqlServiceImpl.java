@@ -11,9 +11,9 @@ import java.util.UUID;
 public class SqlServiceImpl implements SqlService {
     private final String sql_order_log_insert= "insert into orderLog(id,stage,from,to,content,msg,port) values(?,?,?,?,?,?,?)";
     private final String sql_inventory_log_insert= "insert into inventoryLog(id,stage,from,to,content,msg,port) values(?,?,?,?,?,?,?)";
-    private final String sql_order_log_update = "update orderLog set stage=? where id=?)";
-    private final String sql_inventory_log_update = "update inventoryLog set stage=? where id=?)";
-    private final String sql_order_insert = "insert into order(id,iphone,ipad,imac) values(?,?,?,?)";
+    private final String sql_order_log_update = "update orderLog set stage=? where id=?";
+    private final String sql_inventory_log_update = "update inventoryLog set stage=? where id=?";
+    private final String sql_order_insert = "insert into order(id,iPhone,iPad,iMac) values(?,?,?,?)";
     private final String sql_inventory_update = "update inventory set inventoryNum=inventoryNum-? where item=?";
     private Connection sqlConnection;
     private TransferMessage transferMessage;
@@ -58,26 +58,26 @@ public class SqlServiceImpl implements SqlService {
     public void placeOrder() throws SQLException {
         PreparedStatement preparedStatement = sqlConnection.prepareStatement(this.sql_order_insert);
         preparedStatement.setString(1, uuid);
-        preparedStatement.setInt(2, cart.get("iphone"));
-        preparedStatement.setInt(3, cart.get("ipad"));
-        preparedStatement.setInt(4, cart.get("imac"));
+        preparedStatement.setInt(2, cart.get("iPhone"));
+        preparedStatement.setInt(3, cart.get("iPad"));
+        preparedStatement.setInt(4, cart.get("iMac"));
         preparedStatement.executeUpdate();
     }
 
     @Override
-    public void delteInventory() throws SQLException {
-        Integer iphoneNum = cart.get("iphone");
+    public void deleteInventory() throws SQLException {
+        Integer iPhoneNum = cart.get("iPhone");
         PreparedStatement ps = sqlConnection.prepareStatement(this.sql_inventory_update);
-        ps.setInt(1, cart.get("iphone"));
-        ps.setString(2, "iphone");
+        ps.setInt(1, cart.get("iPhone"));
+        ps.setString(2, "iPhone");
         ps.addBatch();
 
-        ps.setInt(1, cart.get("ipad"));
-        ps.setString(2, "ipad");
+        ps.setInt(1, cart.get("iPad"));
+        ps.setString(2, "iPad");
         ps.addBatch();
 
-        ps.setInt(1, cart.get("imac"));
-        ps.setString(2, "imac");
+        ps.setInt(1, cart.get("iMac"));
+        ps.setString(2, "iMac");
         ps.addBatch();
         ps.executeUpdate();
     }
