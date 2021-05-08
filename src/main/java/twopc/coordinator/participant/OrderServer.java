@@ -16,9 +16,8 @@ import java.sql.Connection;
 public class OrderServer extends Server{
 
 
-    public OrderServer(Connection connection) {
-        super(connection);
-        this.setPort(9001);
+    public OrderServer(Integer port) {
+        this.setPort(port);
     }
 
     public static void main(String[] args) {

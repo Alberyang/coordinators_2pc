@@ -41,38 +41,15 @@ public class SocketUtil {
         }
     }
 
-    public TransferMessage readTransferMessage(Socket coConection){
-        InputStream inputStream = null;
-        InputStreamReader inputStreamReader = null;
-        BufferedReader bufferedReader = null;
+    public static BufferedReader createInputStream(Socket coConection){
         try{
-            inputStream = coConection.getInputStream();
-            inputStreamReader = new InputStreamReader(inputStream);
-            bufferedReader = new BufferedReader(inputStreamReader);
-            String temp = "";
-//            while ((temp = bufferedReader.readLine()) != null) {
-//                TransferMessage transferMessage = JSONObject.parseObject(temp.toString(), TransferMessage.class);
-//            }
-            return JSONObject.parseObject(temp, TransferMessage.class);
-        } catch (IOException e) {
+            InputStream inputStream = coConection.getInputStream();
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream,StandardCharsets.UTF_8);
+            BufferedReader in = new BufferedReader(inputStreamReader);
+            return in;
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
-            // close
-            try {
-                if(inputStream!=null){
-                    inputStream.close();
-                }
-                if(inputStreamReader!=null){
-                    inputStreamReader.close();
-                }
-                if(bufferedReader!=null){
-                    bufferedReader.close();
-                }
-            }catch (Exception e){
-                System.out.println("关闭流失败");
-                e.printStackTrace();
-            }
-
+            System.out.println("Error happened when create the inputstream");
         }
         return null;
     }

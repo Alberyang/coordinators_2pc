@@ -30,23 +30,6 @@ public class ServerWorker {
         this.transferMessage = transferMessage;
 
     }
-    public void responseTransferMessage(Socket coConection,TransferMessage transferMessage){
-
-        try {
-            System.out.println("ready to send to coordinator");
-            OutputStream outputStream = coConection.getOutputStream();
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
-            BufferedWriter out = new BufferedWriter(outputStreamWriter);
-            out.write(JSONObject.toJSONString(transferMessage));
-            out.flush();
-            System.out.println("send to coordinator done");
-
-        }catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error happened when server transmitted message to the coordinator");
-        }
-
-    }
     public void work(){
         Integer port = transferMessage.getPort();
         BufferedWriter out = SocketUtil.createOutputStream(this.coConnection);

@@ -10,9 +10,8 @@ import java.sql.Connection;
 public class InventoryServer extends Server {
 
 
-    public InventoryServer(Connection connection) {
-        super(connection);
-        this.setPort(9002);
+    public InventoryServer(Integer port) {
+        this.setPort(port);
     }
 
     public static void main(String[] args) {
