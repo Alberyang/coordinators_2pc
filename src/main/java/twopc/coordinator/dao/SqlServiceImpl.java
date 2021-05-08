@@ -11,10 +11,10 @@ import java.util.UUID;
 public class SqlServiceImpl implements SqlService {
     private final String sql_order_log_insert= "insert into orderLog(id,stage,_from,_to,content,msg,port) values(?,?,?,?,?,?,?)";
     private final String sql_inventory_log_insert= "insert into inventoryLog(id,stage,_from,_to,content,msg,port) values(?,?,?,?,?,?,?)";
-    private final String sql_order_log_update = "update orderLog set stage=? whergie id=?";
+    private final String sql_order_log_update = "update orderLog set stage=? where id=?";
     private final String sql_inventory_log_update = "update inventoryLog set stage=? where id=?";
     private final String sql_order_insert = "insert into order(id,iPhone,iPad,iMac) values(?,?,?,?)";
-    private final String sql_inventory_update = "update inventory set inventoryNum=inventoryNum-? where item=?";
+    private final String sql_inventory_update = "update inventory set inventoryNum=? where item=?";
     private Connection sqlConnection;
     private TransferMessage transferMessage;
     private HashMap<String, Integer> cart;
