@@ -10,7 +10,7 @@ import java.util.Properties;
 public class DbUtils {
 
 
-    public static Connection getConnection() throws IOException {
+    public static Connection getConnection(String db_name) throws IOException {
 
         InputStream is = DbUtils.class.getClassLoader().getResourceAsStream("jdbc.properties");
 
@@ -19,7 +19,7 @@ public class DbUtils {
 
         String user = pros.getProperty("user");
         String password = pros.getProperty("password");
-        String url = pros.getProperty("url");
+        String url = pros.getProperty(db_name);
         String driver = pros.getProperty("driver");
 
         Connection conn = null;
@@ -42,6 +42,6 @@ public class DbUtils {
 
     public static void main(String[] args) throws IOException {
 
-        System.out.println(getConnection());
+        System.out.println(getConnection("inventory"));
     }
 }
