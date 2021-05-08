@@ -64,7 +64,6 @@ public class ShoppingHandler extends AbstractHandler {
         final String msg = "Request Pre-Commit Voting";
         TransferMessage message = setTransferMessage(jsonData, Stage.VOTE_REQUEST, msg);
         try{
-
             cyclicBarrier.await(3000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
             log.severe("System Pre-Commit Failed, Roll Back Operations");
@@ -90,14 +89,12 @@ public class ShoppingHandler extends AbstractHandler {
         final String msg = "Request Global Commit";
         TransferMessage message = setTransferMessage(jsonData, Stage.GLOBAL_COMMIT, msg);
         try{
-
             cyclicBarrier.await(3000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
             log.severe("System Do-Commit Failed, Roll Back Operations");
             // Rollback Operation
             return false;
         }
-
         if (cyclicBarrier.getNumberWaiting() == 0) {
             // Pre-Commit Successful
             log.info("System Do-Commit Done");

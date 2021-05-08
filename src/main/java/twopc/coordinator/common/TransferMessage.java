@@ -11,9 +11,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class TransferMessage implements Serializable {
     private static final long serialVersionUID = -5809782578272943999L;
-    // 9000 协调者服务器
-    // 9001 订单服务器
-    // 9002 库存服务器
     private String id;
     private Stage stage;
     private ShoppingCart cart; // 购物车里的商品

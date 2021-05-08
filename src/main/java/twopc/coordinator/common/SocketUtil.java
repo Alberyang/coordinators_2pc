@@ -40,7 +40,6 @@ public class SocketUtil {
             System.out.println("Error happened when response transfer message to server");
         }
     }
-
     public static BufferedReader createInputStream(Socket coConection){
         try{
             InputStream inputStream = coConection.getInputStream();
@@ -53,6 +52,7 @@ public class SocketUtil {
         }
         return null;
     }
+
     public TransferMessage getTransferMessage() {
         return transferMessage;
     }

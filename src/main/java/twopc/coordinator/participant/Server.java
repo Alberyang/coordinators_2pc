@@ -1,10 +1,7 @@
 package twopc.coordinator.participant;
-
-import com.alibaba.fastjson.JSONObject;
 import twopc.coordinator.common.SocketUtil;
 import twopc.coordinator.common.TransferMessage;
 import utils.DbUtils;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,10 +11,13 @@ import java.sql.Connection;
 
 public abstract class Server {
     private Connection sqlConnection;
-    private Integer port = null;
-    public Server() {
+    private final Integer port;
+    private String database;
+    public Server(Integer port,String database) {
+        this.database = database;
+        this.port = port;
         try {
-            this.sqlConnection = DbUtils.getConnection();
+            this.sqlConnection = DbUtils.getConnection(this.database);
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Error! Cannot connect to the database");
@@ -43,7 +43,7 @@ public abstract class Server {
             reconnect_num--;
         }
         if(socket==null){
-            System.out.println("It can't connect to the coordinator after reconnecting for "+reconnect_num+" times");
+            System.out.println("It can't connect to the coordinator after reconnecting for 5 times");
             System.exit(-1);
         }
         InputStream inputStream = null;
@@ -55,10 +55,17 @@ public abstract class Server {
             inputStreamReader = new InputStreamReader(inputStream);
             bufferedReader = new BufferedReader(inputStreamReader);
             String temp = null;
-            while ((temp = bufferedReader.readLine()) != null) {
-                TransferMessage transferMessage = SocketUtil.parseTransferMessage(temp);
+            while ((temp = bufferedReader.readLine())!=null) {
+                TransferMessage transferMessage = null;
+                try {
+                     transferMessage = SocketUtil.parseTransferMessage(temp);
+                }catch (Exception e){
+                    System.out.println("Msg from coordinator can not be parsed as the object TransferMessage");
+                    continue;
+                }
+
                 if(sqlConnection==null){
-                    this.sqlConnection = DbUtils.getConnection();
+                    this.sqlConnection = DbUtils.getConnection(this.database);
                 }
                 if(transferMessage!=null){
                     System.out.println("This server received the object 'TransferMessage'");
@@ -107,7 +114,4 @@ public abstract class Server {
         return port;
     }
 
-    public void setPort(Integer port) {
-        this.port = port;
-    }
 }
