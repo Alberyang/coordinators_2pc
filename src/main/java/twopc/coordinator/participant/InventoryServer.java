@@ -3,7 +3,7 @@ package twopc.coordinator.participant;
 public class InventoryServer extends Server {
 
     public InventoryServer(Integer port) {
-        super(port,"2pc_inventory");
+        super(port,"inventory");
     }
 
     public static void main(String[] args) {

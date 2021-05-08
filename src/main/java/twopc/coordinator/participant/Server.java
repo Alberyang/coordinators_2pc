@@ -44,57 +44,57 @@ public abstract class Server {
         InputStream inputStream = null;
         InputStreamReader inputStreamReader = null;
         BufferedReader bufferedReader = null;
-//        while(true) {
-        try {
-            inputStream = socket.getInputStream();
-            inputStreamReader = new InputStreamReader(inputStream);
-            bufferedReader = new BufferedReader(inputStreamReader);
-            String temp = null;
-            while ((temp = bufferedReader.readLine())!=null) {
-                TransferMessage transferMessage = null;
-                try {
-                     transferMessage = SocketUtil.parseTransferMessage(temp);
-                }catch (Exception e){
-                    System.out.println("Msg from coordinator can not be parsed as the object TransferMessage");
-                    continue;
-                }
-
-                if(sqlConnection==null){
-                    this.sqlConnection = DbUtils.getConnection(this.database);
-                }
-                if(transferMessage!=null){
-                    System.out.println("This server received the object 'TransferMessage'");
-                    ServerWorker orderServerWorker = new ServerWorker(socket, sqlConnection,transferMessage);
-                    orderServerWorker.work();
-                }else {
-                    System.out.println("The message server received can not be identified");
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error, closing the connection with coordinator");
+        while(true) {
             try {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-                if (inputStreamReader != null) {
-                    inputStreamReader.close();
-                }
-                if (bufferedReader != null) {
-                    bufferedReader.close();
-                }
-                if (!socket.isClosed()) {
-                    socket.close();
+                inputStream = socket.getInputStream();
+                inputStreamReader = new InputStreamReader(inputStream);
+                bufferedReader = new BufferedReader(inputStreamReader);
+                String temp = null;
+                while ((temp = bufferedReader.readLine())!=null) {
+                    TransferMessage transferMessage = null;
+                    try {
+                         transferMessage = SocketUtil.parseTransferMessage(temp);
+                    }catch (Exception e){
+                        System.out.println("Msg from coordinator can not be parsed as the object TransferMessage");
+                        continue;
+                    }
+
+                    if(sqlConnection==null){
+                        this.sqlConnection = DbUtils.getConnection(this.database);
+                    }
+                    if(transferMessage!=null){
+                        System.out.println("This server received the object 'TransferMessage'");
+                        ServerWorker orderServerWorker = new ServerWorker(socket, sqlConnection,transferMessage);
+                        orderServerWorker.work();
+                    }else {
+                        System.out.println("The message server received can not be identified");
+                    }
                 }
 
-            } catch (Exception e1) {
-                e1.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Error, closing the connection with coordinator");
+                try {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                    if (inputStreamReader != null) {
+                        inputStreamReader.close();
+                    }
+                    if (bufferedReader != null) {
+                        bufferedReader.close();
+                    }
+                    if (!socket.isClosed()) {
+                        socket.close();
+                    }
+
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+
+                System.out.println("Fetal Error! The server has stopped!");
             }
-
-            System.out.println("Fetal Error! The server has stopped!");
         }
-//        }
     }
 
     public Connection getSqlConnection() {
