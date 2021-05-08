@@ -1,8 +1,5 @@
-package twopc.coordinator.dao;
+package twopc.dao;
 
-import twopc.coordinator.common.TransferMessage;
-
-import java.sql.Connection;
 import java.sql.SQLException;
 
 public interface SqlService {

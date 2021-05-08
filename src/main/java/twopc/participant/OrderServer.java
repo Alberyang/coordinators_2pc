@@ -1,4 +1,4 @@
-package twopc.coordinator.participant;
+package twopc.participant;
 
 
 import lombok.Data;

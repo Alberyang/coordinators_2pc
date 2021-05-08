@@ -1,4 +1,4 @@
-package twopc.coordinator.common;
+package twopc.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

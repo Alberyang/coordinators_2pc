@@ -1,29 +1,31 @@
 package twopc.coordinator.handler;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import twopc.coordinator.common.ShoppingCart;
-import twopc.coordinator.common.Stage;
-import twopc.coordinator.common.TransferMessage;
+import twopc.common.ShoppingCart;
+import twopc.common.Stage;
+import twopc.common.TransferMessage;
+import twopc.coordinator.Coordinator;
+import utils.SocketUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.List;
+import java.util.concurrent.*;
 import java.util.logging.Logger;
 
 public class ShoppingHandler extends AbstractHandler {
     private static final Logger log = Logger.getLogger(ShoppingHandler.class.getName());
     private final CyclicBarrier cyclicBarrier = new CyclicBarrier(4);
+//    private Coordinator coordinator;
+
+//    public ShoppingHandler(Coordinator coordinator){this.coordinator = coordinator}
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request,
@@ -44,13 +46,22 @@ public class ShoppingHandler extends AbstractHandler {
             }
             JSONObject requestJson = JSONObject.parseObject(jsonString.toString());
 
-            if (preCommit(requestJson) && doCommit(requestJson)){
-                response.setStatus(HttpServletResponse.SC_OK);
-                log.info("Transaction Process Completed.");
-            } else {
+            if (!preCommit(requestJson)){
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                log.info("Transaction Process Failed, Rollback to Previous");
+                System.out.println("Pre-commit Process Failed, Rollback to Previous");
+                Coordinator.rollback(Stage.VOTE_ABORT);
+                return;
             }
+
+            if (!doCommit(requestJson)){
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                System.out.println("Do-commit Process Failed, Rollback to Previous");
+                Coordinator.rollback(Stage.GLOBAL_ABORT);
+                return;
+            }
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            log.info("Transaction Process Completed.");
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             log.info("Unknown type of operation");
@@ -62,8 +73,24 @@ public class ShoppingHandler extends AbstractHandler {
      */
     private boolean preCommit(JSONObject jsonData) {
         final String msg = "Request Pre-Commit Voting";
+        List<TransferMessage> responses = new ArrayList<>();
         TransferMessage message = setTransferMessage(jsonData, Stage.VOTE_REQUEST, msg);
         try{
+            // Send Request
+            Coordinator.commitRequest(message);
+
+            // Wait for response
+            Coordinator.participants.forEach((key, value) ->{
+                try {
+                    BufferedReader in = SocketUtil.createInputStream(value);
+                    if (value != null && in != null) {
+                        responses.add(SocketUtil.getResponse(in));
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
             cyclicBarrier.await(3000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
             log.severe("System Pre-Commit Failed, Roll Back Operations");
@@ -72,6 +99,13 @@ public class ShoppingHandler extends AbstractHandler {
         }
 
         if (cyclicBarrier.getNumberWaiting() == 0) {
+            for (TransferMessage response : responses) {
+                if (response.getStage() != Stage.COMMIT_SUCCESS) {
+                    log.warning("Participant:" + response.getPort() + " Pre-commit failed");
+                    System.out.println(response.getMsg());
+                    return false;
+                }
+            }
             // Pre-Commit Successful
             log.info("System Pre-Commit Done");
             return true;
@@ -87,8 +121,24 @@ public class ShoppingHandler extends AbstractHandler {
      */
     private boolean doCommit(JSONObject jsonData) {
         final String msg = "Request Global Commit";
+        List<TransferMessage> responses = new ArrayList<>();
         TransferMessage message = setTransferMessage(jsonData, Stage.GLOBAL_COMMIT, msg);
         try{
+            // Send Request
+            Coordinator.commitRequest(message);
+
+            // Wait for response
+            Coordinator.participants.forEach((key, value) ->{
+                try {
+                    BufferedReader in = SocketUtil.createInputStream(value);
+                    if (value != null && in != null) {
+                        responses.add(SocketUtil.getResponse(in));
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
             cyclicBarrier.await(3000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
             log.severe("System Do-Commit Failed, Roll Back Operations");
@@ -96,21 +146,26 @@ public class ShoppingHandler extends AbstractHandler {
             return false;
         }
         if (cyclicBarrier.getNumberWaiting() == 0) {
-            // Pre-Commit Successful
+            for (TransferMessage response : responses) {
+                if (response.getStage() != Stage.COMMIT_SUCCESS) {
+                    log.warning("Participant:" + response.getPort() + " Do-commit failed");
+                    System.out.println(response.getMsg());
+                    return false;
+                }
+            }
+            // Do-Commit Successful
             log.info("System Do-Commit Done");
             return true;
         } else {
-            // Pre-Commit Unsuccessful
+            // Do-Commit Unsuccessful
             log.warning("System Do-Commit Failed");
             return false;
         }
     }
 
-
     /**
      * Generate transfer message
      */
-
     private TransferMessage setTransferMessage(JSONObject jsonData, Stage stage, String msg){
         TransferMessage message = new TransferMessage();
 
@@ -128,11 +183,6 @@ public class ShoppingHandler extends AbstractHandler {
         message.setTo("Server");
         message.setMsg(msg);
 
-
-        // Sent message to servers
-//        message.setPort();
-//
-//        message.setPort(port);
         return message;
     }
 }

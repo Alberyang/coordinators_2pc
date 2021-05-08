@@ -1,12 +1,12 @@
 package utils;
 
 import com.alibaba.fastjson.JSONObject;
-import twopc.coordinator.common.TransferMessage;
+import twopc.common.TransferMessage;
+import twopc.participant.ServerWorker;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
 
 public class SocketUtil {
     private TransferMessage transferMessage;
@@ -41,6 +41,17 @@ public class SocketUtil {
             System.out.println("Error happened when response transfer message to server");
         }
     }
+    public static void sendTransferMsg(BufferedWriter out,TransferMessage transferMessage){
+        try{
+            System.out.println("ready to send to participant");
+            out.write(JSONObject.toJSONString(transferMessage));
+            out.flush();
+            System.out.println("send to participant done");
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Error happened when send transfer message to server");
+        }
+    }
     public static BufferedReader createInputStream(Socket coConection){
         try{
             InputStream inputStream = coConection.getInputStream();
@@ -52,6 +63,24 @@ public class SocketUtil {
             System.out.println("Error happened when create the inputstream");
         }
         return null;
+    }
+
+    public static TransferMessage getResponse(BufferedReader in) throws IOException {
+        String temp = null;
+        TransferMessage transferMessage = null;
+        if ((temp = in.readLine())!=null) {
+            try {
+                transferMessage = SocketUtil.parseTransferMessage(temp);
+            } catch (Exception e) {
+                System.out.println("Msg from coordinator can not be parsed as the object TransferMessage");
+            }
+            if(transferMessage!=null){
+                System.out.println("This server received the object 'TransferMessage'");
+            }else {
+                System.out.println("The message server received can not be identified");
+            }
+        }
+        return transferMessage;
     }
 
     public TransferMessage getTransferMessage() {

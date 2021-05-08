@@ -1,11 +1,11 @@
-package twopc.coordinator.participant;
+package twopc.participant;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import utils.SocketUtil;
-import twopc.coordinator.common.Stage;
-import twopc.coordinator.common.TransferMessage;
-import twopc.coordinator.dao.SqlServiceImpl;
+import twopc.common.Stage;
+import twopc.common.TransferMessage;
+import twopc.dao.SqlServiceImpl;
 import java.io.*;
 import java.net.Socket;
 import java.sql.Connection;

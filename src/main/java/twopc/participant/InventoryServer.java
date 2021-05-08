@@ -1,4 +1,4 @@
-package twopc.coordinator.participant;
+package twopc.participant;
 
 public class InventoryServer extends Server {
 

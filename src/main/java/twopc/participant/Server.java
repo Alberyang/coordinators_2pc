@@ -1,6 +1,6 @@
-package twopc.coordinator.participant;
+package twopc.participant;
+import twopc.common.TransferMessage;
 import utils.SocketUtil;
-import twopc.coordinator.common.TransferMessage;
 import utils.DbUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
