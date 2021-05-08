@@ -12,7 +12,7 @@ import java.sql.Connection;
 public abstract class Server {
     private Connection sqlConnection;
     private final Integer port;
-    private String database;
+    private final String database;
     public Server(Integer port,String database) {
         this.database = database;
         this.port = port;
