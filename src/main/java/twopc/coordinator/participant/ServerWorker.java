@@ -2,7 +2,7 @@ package twopc.coordinator.participant;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import twopc.coordinator.common.SocketUtil;
+import utils.SocketUtil;
 import twopc.coordinator.common.Stage;
 import twopc.coordinator.common.TransferMessage;
 import twopc.coordinator.dao.SqlServiceImpl;

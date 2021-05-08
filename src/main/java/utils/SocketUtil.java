@@ -1,6 +1,7 @@
-package twopc.coordinator.common;
+package utils;
 
 import com.alibaba.fastjson.JSONObject;
+import twopc.coordinator.common.TransferMessage;
 
 import java.io.*;
 import java.net.Socket;
