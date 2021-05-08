@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import twopc.coordinator.common.SocketUtil;
 import twopc.coordinator.common.Stage;
 import twopc.coordinator.common.TransferMessage;
 import twopc.coordinator.dao.SqlService;
@@ -12,6 +13,7 @@ import twopc.coordinator.dao.SqlServiceImpl;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -21,74 +23,36 @@ public class ServerWorker {
     private TransferMessage transferMessage;
     private Socket coConnection;
     private Connection sqlConnection;
-    public ServerWorker(Socket coConection, Connection sqlConnection){
+
+    public ServerWorker(Socket coConection, Connection sqlConnection,TransferMessage transferMessage){
         this.sqlConnection = sqlConnection;
         this.coConnection = coConection;
+        this.transferMessage = transferMessage;
 
-    }
-
-    public TransferMessage readTransferMessage(Socket coConection){
-        InputStream inputStream = null;
-        InputStreamReader inputStreamReader = null;
-        BufferedReader bufferedReader = null;
-        try{
-            inputStream = coConection.getInputStream();
-            inputStreamReader = new InputStreamReader(inputStream);
-            bufferedReader = new BufferedReader(inputStreamReader);
-            StringBuilder msg = new StringBuilder();
-
-//            while ((temp = bufferedReader.readLine()) != null) {
-//                info.append(temp);
-//                System.out.println("server accept connection");
-//                System.out.println("client info:" + info);
-//            }
-            return JSONObject.parseObject(msg.toString(),TransferMessage.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }finally {
-            // close
-            try {
-                if(inputStream!=null){
-                    inputStream.close();
-                }
-                if(inputStreamReader!=null){
-                    inputStreamReader.close();
-                }
-                if(bufferedReader!=null){
-                    bufferedReader.close();
-                }
-            }catch (Exception e){
-                System.out.println("关闭流失败");
-                e.printStackTrace();
-            }
-
-        }
-        return null;
     }
     public void responseTransferMessage(Socket coConection,TransferMessage transferMessage){
-        //相应协调者
+
         try {
             System.out.println("ready to send to coordinator");
             OutputStream outputStream = coConection.getOutputStream();
-            PrintWriter printWriter = new PrintWriter(outputStream);
-            printWriter.print(JSONObject.toJSONString(transferMessage));
-            printWriter.flush();
-            coConection.shutdownOutput();
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
+            BufferedWriter out = new BufferedWriter(outputStreamWriter);
+            out.write(JSONObject.toJSONString(transferMessage));
+            out.flush();
             System.out.println("send to coordinator done");
-            printWriter.close();
-            outputStream.close();
+
         }catch (Exception e) {
             e.printStackTrace();
+            System.out.println("Error happened when server transmitted message to the coordinator");
         }
 
     }
     public void work(){
-        this.transferMessage = this.readTransferMessage(this.coConnection);
         Integer port = transferMessage.getPort();
+        BufferedWriter out = SocketUtil.createOutputStream(this.coConnection);
         SqlServiceImpl sqlService = new SqlServiceImpl(sqlConnection,transferMessage);
-        //first phase: vote-request
+        //first phase: vote-request / pre-commit
         if(transferMessage.getStage().getCode()==1){
-            //数据库本地执行 不提交
             System.out.println("Current stage is "+ transferMessage.getStage());
             System.out.println("Receiving message from coordinator "+ transferMessage.getMsg());
             try{
@@ -102,11 +66,10 @@ public class ServerWorker {
                 transferMessage.setStage(Stage.VOTE_COMMIT);
                 transferMessage.setMsg("This server votes commit to coordinator");
             }catch (Exception e){
-                //response
                 transferMessage.setMsg("Local Transaction execution fails");
                 transferMessage.setStage(Stage.VOTE_ABORT);
             }finally {
-                this.responseTransferMessage(this.coConnection,transferMessage);
+                SocketUtil.responseTransferMsg(out,transferMessage);
             }
 
         } else if(transferMessage.getStage().getCode() == 4){
@@ -128,8 +91,7 @@ public class ServerWorker {
                 transferMessage.setStage(Stage.ABORT);
             }
             finally {
-                // 返回执行结果并返回给协调者
-                this.responseTransferMessage(coConnection,transferMessage);
+                SocketUtil.responseTransferMsg(out,transferMessage);
             }
 
 
@@ -153,7 +115,7 @@ public class ServerWorker {
                 transferMessage.setMsg("This database rollback fails");
                 transferMessage.setStage(Stage.ABORT);
             }finally {
-                this.responseTransferMessage(coConnection,transferMessage);
+                SocketUtil.responseTransferMsg(out,transferMessage);
             }
 
         }

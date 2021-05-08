@@ -4,13 +4,41 @@ import com.alibaba.fastjson.JSONObject;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 
 public class SocketUtil {
     private TransferMessage transferMessage;
-    private Socket coConnection;
-    public SocketUtil(Socket coConection){
-        this.coConnection = coConection;
+    private Socket socket;
+    public SocketUtil(Socket socket){
+        this.socket = socket;
+    }
+
+    public static TransferMessage parseTransferMessage(String jsonMsg){
+        return JSONObject.parseObject(jsonMsg, TransferMessage.class);
+    }
+    public static BufferedWriter createOutputStream(Socket socket){
+        try {
+            OutputStream outputStream = socket.getOutputStream();
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
+            BufferedWriter out = new BufferedWriter(outputStreamWriter);
+            return out;
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Error happened when create outputsteam object");
+        }
+        return null;
+    }
+    public static void responseTransferMsg(BufferedWriter out,TransferMessage transferMessage){
+        try{
+            System.out.println("ready to send to coordinator");
+            out.write(JSONObject.toJSONString(transferMessage));
+            out.flush();
+            System.out.println("send to coordinator done");
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Error happened when response transfer message to server");
+        }
     }
 
     public TransferMessage readTransferMessage(Socket coConection){
@@ -21,14 +49,11 @@ public class SocketUtil {
             inputStream = coConection.getInputStream();
             inputStreamReader = new InputStreamReader(inputStream);
             bufferedReader = new BufferedReader(inputStreamReader);
-            StringBuilder msg = new StringBuilder();
-
+            String temp = "";
 //            while ((temp = bufferedReader.readLine()) != null) {
-//                info.append(temp);
-//                System.out.println("server accept connection");
-//                System.out.println("client info:" + info);
+//                TransferMessage transferMessage = JSONObject.parseObject(temp.toString(), TransferMessage.class);
 //            }
-            return JSONObject.parseObject(msg.toString(),TransferMessage.class);
+            return JSONObject.parseObject(temp, TransferMessage.class);
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
@@ -51,21 +76,19 @@ public class SocketUtil {
         }
         return null;
     }
-    public void responseTransferMessage(Socket coConection,TransferMessage transferMessage){
-        //相应协调者
-        try {
-            System.out.println("ready to send to coordinator");
-            OutputStream outputStream = coConection.getOutputStream();
-            PrintWriter printWriter = new PrintWriter(outputStream);
-            printWriter.print(JSONObject.toJSONString(transferMessage));
-            printWriter.flush();
-            coConection.shutdownOutput();
-            System.out.println("send to coordinator done");
-            printWriter.close();
-            outputStream.close();
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
+    public TransferMessage getTransferMessage() {
+        return transferMessage;
+    }
 
+    public void setTransferMessage(TransferMessage transferMessage) {
+        this.transferMessage = transferMessage;
+    }
+
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public void setSocket(Socket socket) {
+        this.socket = socket;
     }
 }
