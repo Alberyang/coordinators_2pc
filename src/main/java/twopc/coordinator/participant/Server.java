@@ -16,12 +16,7 @@ public abstract class Server {
     public Server(Integer port,String database) {
         this.database = database;
         this.port = port;
-        try {
-            this.sqlConnection = DbUtils.getConnection(this.database);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Error! Cannot connect to the database");
-        }
+        this.sqlConnection = DbUtils.getConnection(this.database);
     }
     // Connect to the coordinator
     public Socket connect(){
