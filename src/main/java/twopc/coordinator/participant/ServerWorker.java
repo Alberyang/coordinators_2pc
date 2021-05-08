@@ -37,7 +37,7 @@ public class ServerWorker {
                     sqlService.placeOrder();
                 }
                 if(port==9002){
-                    sqlService.delteInventory();
+                    sqlService.deleteInventory();
                 }
                 transferMessage.setStage(Stage.VOTE_COMMIT);
                 transferMessage.setMsg("This server votes commit to coordinator");

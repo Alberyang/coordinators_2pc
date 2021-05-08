@@ -11,17 +11,17 @@ import java.util.HashMap;
 @AllArgsConstructor
 public class ShoppingCart {
     //库存数据库结构 商品名 库存数量
-    //订单数据库结构 订单id(时间戳)  iphone  ipad  imac --》值为购买的数量  限制商品数简化
+    //订单数据库结构 订单id(时间戳)  iPhone  iPad  iMac --》值为购买的数量  限制商品数简化
     //日志表记录 时间戳 操作
     private HashMap<String,Integer> cart;
-    public void buyIphone(Integer num){
-        this.cart.put("iphone",num);
+    public void buyiPhone(Integer num){
+        this.cart.put("iPhone",num);
     }
-    public void buyIpad(Integer num){
-        this.cart.put("ipad",num);
+    public void buyiPad(Integer num){
+        this.cart.put("iPad",num);
     }
-    public void buyImac(Integer num){
-        this.cart.put("imac",num);
+    public void buyiMac(Integer num){
+        this.cart.put("iMac",num);
     }
 
     public HashMap<String, Integer> getCart() {
