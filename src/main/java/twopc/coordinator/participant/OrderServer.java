@@ -1,36 +1,23 @@
 package twopc.coordinator.participant;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import twopc.coordinator.common.TransferMessage;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.sql.Connection;
 
 @Data
-@AllArgsConstructor
-public class OrderServer {
-    private Connection sqlConnection;
-    private Integer port;
-    public OrderServer(Connection connection) {
-        this.sqlConnection = connection;
-    }
-    private void serverLaunch(){
-        try {
-            ServerSocket serverSocket = new ServerSocket(this.port);
-            System.out.println("Server order has been launched");
-            while(true){
-                Socket coConnection = serverSocket.accept();
-                //生成新连接？
-                OrderServerWorker orderServerWorker = new OrderServerWorker(coConnection,sqlConnection);
-                orderServerWorker.start();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+public class OrderServer extends Server{
+
+
+    public OrderServer(Integer port) {
+        this.setPort(port);
     }
 
     public static void main(String[] args) {

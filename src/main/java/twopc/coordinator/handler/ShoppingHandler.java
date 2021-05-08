@@ -1,8 +1,12 @@
 package twopc.coordinator.handler;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import twopc.coordinator.common.ShoppingCart;
+import twopc.coordinator.common.Stage;
+import twopc.coordinator.common.TransferMessage;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +22,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 public class ShoppingHandler extends AbstractHandler {
-    private static Logger log = Logger.getLogger(ShoppingHandler.class.getName());
+    private static final Logger log = Logger.getLogger(ShoppingHandler.class.getName());
     private final CyclicBarrier cyclicBarrier = new CyclicBarrier(4);
 
     @Override
@@ -30,7 +35,7 @@ public class ShoppingHandler extends AbstractHandler {
         baseRequest.setHandled(true);
 
         if (target.equalsIgnoreCase("/shopping")) {
-            // Processing
+            // Processing HTTP Request
             String line;
             StringBuilder jsonString = new StringBuilder();
             BufferedReader reader = request.getReader();
@@ -39,7 +44,7 @@ public class ShoppingHandler extends AbstractHandler {
             }
             JSONObject requestJson = JSONObject.parseObject(jsonString.toString());
 
-            if (pre_commit(requestJson) && do_commit(requestJson)){
+            if (preCommit(requestJson) && doCommit(requestJson)){
                 response.setStatus(HttpServletResponse.SC_OK);
                 log.info("Transaction Process Completed.");
             } else {
@@ -55,8 +60,11 @@ public class ShoppingHandler extends AbstractHandler {
     /**
      * Pre-Commit Phase
      */
-    private boolean pre_commit(JSONObject jsonData) {
+    private boolean preCommit(JSONObject jsonData) {
+        final String msg = "Request Pre-Commit Voting";
+        TransferMessage message = setTransferMessage(jsonData, Stage.VOTE_REQUEST, msg);
         try{
+
             cyclicBarrier.await(3000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
             log.severe("System Pre-Commit Failed, Roll Back Operations");
@@ -78,8 +86,11 @@ public class ShoppingHandler extends AbstractHandler {
     /**
      * Do-Commit Phase
      */
-    private boolean do_commit(JSONObject jsonData) {
+    private boolean doCommit(JSONObject jsonData) {
+        final String msg = "Request Global Commit";
+        TransferMessage message = setTransferMessage(jsonData, Stage.GLOBAL_COMMIT, msg);
         try{
+
             cyclicBarrier.await(3000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
             log.severe("System Do-Commit Failed, Roll Back Operations");
@@ -98,4 +109,33 @@ public class ShoppingHandler extends AbstractHandler {
         }
     }
 
+
+    /**
+     * Generate transfer message
+     */
+
+    private TransferMessage setTransferMessage(JSONObject jsonData, Stage stage, String msg){
+        TransferMessage message = new TransferMessage();
+
+        // Process Shopping Cart
+        ShoppingCart cart = new ShoppingCart();
+        cart.setCart(new HashMap<String, Integer>());
+        cart.buyIphone(jsonData.getIntValue("Iphone"));
+        cart.buyImac(jsonData.getIntValue("Imac"));
+        cart.buyIpad(jsonData.getIntValue("Ipad"));
+
+        // Set Transaction Message
+        message.setStage(stage);
+        message.setCart(cart);
+        message.setFrom("Coordinator");
+        message.setTo("Server");
+        message.setMsg(msg);
+
+
+        // Sent message to servers
+//        message.setPort();
+//
+//        message.setPort(port);
+        return message;
+    }
 }

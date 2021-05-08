@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
 public enum Stage {
     INIT(0),
     VOTE_REQUEST(1),
@@ -15,6 +13,17 @@ public enum Stage {
     VOTE_ABORT(3),
     GLOBAL_COMMIT(4),
     GLOBAL_ABORT(5),
-    DECISION_REQUEST(6);
+    ABORT(6),
+    COMMIT_SUCCESS(7);
     private int code;
+
+    public int getCode() {
+        return code;
+    }
+
+    Stage(int code) {
+        this.code = code;
+    }
+
+
 }

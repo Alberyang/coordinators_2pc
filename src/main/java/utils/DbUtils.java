@@ -26,6 +26,7 @@ public class DbUtils {
         try {
             Class.forName(driver);
             conn = DriverManager.getConnection(url, user, password);
+            conn.setAutoCommit(false);
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }

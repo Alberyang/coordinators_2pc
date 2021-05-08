@@ -14,13 +14,21 @@ public class ShoppingCart {
     //订单数据库结构 订单id(时间戳)  iphone  ipad  imac --》值为购买的数量  限制商品数简化
     //日志表记录 时间戳 操作
     private HashMap<String,Integer> cart;
-    void buyIphone(Integer num){
+    public void buyIphone(Integer num){
         this.cart.put("iphone",num);
     }
-    void buyIpad(Integer num){
+    public void buyIpad(Integer num){
         this.cart.put("ipad",num);
     }
-    void buyImac(Integer num){
+    public void buyImac(Integer num){
         this.cart.put("imac",num);
+    }
+
+    public HashMap<String, Integer> getCart() {
+        return cart;
+    }
+
+    public void setCart(HashMap<String, Integer> cart) {
+        this.cart = cart;
     }
 }
