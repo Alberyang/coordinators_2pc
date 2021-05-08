@@ -10,14 +10,15 @@ CREATE TABLE `inventory` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `inventoryLog` (
-  `stage` varchar(32) NOT NULL,
+  `id` varchar(32) NOT NULL,
+  `stage` varchar(45) DEFAULT NULL,
   `_from` varchar(128) DEFAULT NULL,
   `_to` varchar(128) DEFAULT NULL,
   `content` varchar(128) DEFAULT NULL,
   `msg` varchar(128) DEFAULT NULL,
   `port` int DEFAULT NULL,
-  PRIMARY KEY (`stage`),
-  UNIQUE KEY `stage_UNIQUE` (`stage`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP DATABASE IF EXISTS `2pc_order`;
@@ -34,12 +35,13 @@ CREATE TABLE `order` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `orderLog` (
-  `stage` varchar(32) NOT NULL,
+  `id` varchar(32) NOT NULL,
+  `stage` varchar(45) DEFAULT NULL,
   `_from` varchar(128) DEFAULT NULL,
   `_to` varchar(128) DEFAULT NULL,
   `content` varchar(128) DEFAULT NULL,
   `msg` varchar(128) DEFAULT NULL,
   `port` int DEFAULT NULL,
-  PRIMARY KEY (`stage`),
-  UNIQUE KEY `stage_UNIQUE` (`stage`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
