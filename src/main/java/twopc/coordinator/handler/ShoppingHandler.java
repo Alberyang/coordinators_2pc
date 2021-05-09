@@ -7,6 +7,7 @@ import twopc.common.ShoppingCart;
 import twopc.common.Stage;
 import twopc.common.TransferMessage;
 import twopc.coordinator.Coordinator;
+import twopc.coordinator.CoordinatorServer;
 import utils.SocketUtil;
 
 import javax.servlet.ServletException;
@@ -49,14 +50,14 @@ public class ShoppingHandler extends AbstractHandler {
             if (!preCommit(requestJson)){
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 System.out.println("Pre-commit Process Failed, Rollback to Previous");
-                Coordinator.rollback(Stage.VOTE_ABORT);
+                CoordinatorServer.rollback(Stage.VOTE_ABORT);
                 return;
             }
 
             if (!doCommit(requestJson)){
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 System.out.println("Do-commit Process Failed, Rollback to Previous");
-                Coordinator.rollback(Stage.GLOBAL_ABORT);
+                CoordinatorServer.rollback(Stage.GLOBAL_ABORT);
                 return;
             }
 
@@ -77,10 +78,10 @@ public class ShoppingHandler extends AbstractHandler {
         TransferMessage message = setTransferMessage(jsonData, Stage.VOTE_REQUEST, msg);
         try{
             // Send Request
-            Coordinator.commitRequest(message);
+            CoordinatorServer.commitRequest(message);
 
             // Wait for response
-            Coordinator.participants.forEach((key, value) ->{
+            CoordinatorServer.participants.forEach((key, value) ->{
                 try {
                     BufferedReader in = SocketUtil.createInputStream(value);
                     if (value != null && in != null) {
@@ -93,6 +94,7 @@ public class ShoppingHandler extends AbstractHandler {
 
             cyclicBarrier.await(3000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
+            log.severe(e.toString());
             log.severe("System Pre-Commit Failed, Roll Back Operations");
             // Rollback Operation
             return false;
@@ -125,10 +127,10 @@ public class ShoppingHandler extends AbstractHandler {
         TransferMessage message = setTransferMessage(jsonData, Stage.GLOBAL_COMMIT, msg);
         try{
             // Send Request
-            Coordinator.commitRequest(message);
+            CoordinatorServer.commitRequest(message);
 
             // Wait for response
-            Coordinator.participants.forEach((key, value) ->{
+            CoordinatorServer.participants.forEach((key, value) ->{
                 try {
                     BufferedReader in = SocketUtil.createInputStream(value);
                     if (value != null && in != null) {

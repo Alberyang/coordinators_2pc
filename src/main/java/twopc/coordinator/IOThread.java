@@ -8,13 +8,11 @@ import java.util.logging.Logger;
 public class IOThread extends Thread{
     private static final Logger log = Logger.getLogger(IOThread.class.getName());
     private ServerSocket serverSocket = null;
-    private int port;
-    private Coordinator coordinator;
+    private CoordinatorServer coordinatorServer;
 
-    public IOThread(int port, Coordinator coordinator) throws IOException {
+    public IOThread(int port, CoordinatorServer coordinatorServer) throws IOException {
         serverSocket = new ServerSocket(port);
-        this.port = port;
-        this.coordinator = coordinator;
+        this.coordinatorServer = coordinatorServer;
         setName("IOThread");
         start();
     }
@@ -26,7 +24,7 @@ public class IOThread extends Thread{
             try {
                 Socket clientSocket = serverSocket.accept();
                 log.info("Received connection from " + clientSocket.getInetAddress());
-                coordinator.acceptClient(clientSocket);
+                coordinatorServer.acceptClient(clientSocket);
             } catch(Exception e){
                 log.warning("Exception closing server socket: " + e.getMessage());
             }
