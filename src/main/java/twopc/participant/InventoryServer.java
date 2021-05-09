@@ -7,7 +7,7 @@ public class InventoryServer extends Server {
     }
 
     public static void main(String[] args) {
-        InventoryServer inventoryServer = new InventoryServer(8001,9002);
+        InventoryServer inventoryServer = new InventoryServer(9000,9002);
         inventoryServer.serve(inventoryServer.connect());
     }
 }

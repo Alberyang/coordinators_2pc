@@ -24,7 +24,6 @@ public abstract class Server {
     // Connect to the coordinator
     public Socket connect(){
         try {
-
             Socket socket = new Socket();
             socket.bind(new InetSocketAddress(this.clientPort));
             socket.connect(new InetSocketAddress("localhost",this.serverPort));

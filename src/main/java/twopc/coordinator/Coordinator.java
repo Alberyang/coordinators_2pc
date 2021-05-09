@@ -26,7 +26,7 @@ public class Coordinator {
     /**
      * Socket client
      */
-    public void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception{
         // HTTP Server
         Server server = new Server(8001);
         server.setHandler(new ShoppingHandler());
@@ -36,7 +36,7 @@ public class Coordinator {
         // Localhost socket server
         IOThread ioThread;
         try {
-            ioThread = new IOThread(port, this);
+            ioThread = new IOThread(port, new Coordinator());
         } catch (IOException e1) {
             log.severe("could not start the io thread");
             return;
