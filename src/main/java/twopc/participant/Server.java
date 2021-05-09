@@ -6,22 +6,28 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.sql.Connection;
 
 public abstract class Server {
     private Connection sqlConnection;
-    private final Integer port;
+    private final Integer serverPort;
+    private final Integer clientPort;
     private final String database;
-    public Server(Integer port,String database) {
+    public Server(Integer serverPort,Integer clientPort, String database) {
         this.database = database;
-        this.port = port;
+        this.serverPort = serverPort;
+        this.clientPort = clientPort;
         this.sqlConnection = DbUtils.getConnection(this.database);
     }
     // Connect to the coordinator
     public Socket connect(){
         try {
-            Socket socket = new Socket("localhost",this.port);
+
+            Socket socket = new Socket();
+            socket.bind(new InetSocketAddress(this.clientPort));
+            socket.connect(new InetSocketAddress("localhost",this.serverPort));
             socket.setKeepAlive(true);
             System.out.println("Server order has been connected with coordinator");
             return socket;
@@ -105,8 +111,11 @@ public abstract class Server {
         this.sqlConnection = sqlConnection;
     }
 
-    public Integer getPort() {
-        return port;
+    public Integer getServerPort() {
+        return serverPort;
     }
 
+    public Integer getClientPort() {
+        return clientPort;
+    }
 }
