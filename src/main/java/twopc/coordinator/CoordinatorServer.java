@@ -10,13 +10,10 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 public class CoordinatorServer {
     public static HashMap<Integer, Socket> participants = new HashMap<Integer, Socket>();
-    public static ExecutorService executor = Executors.newFixedThreadPool(5);
     private static final Logger log = Logger.getLogger(Coordinator.class.getName());
     private static final int port = 9000;
 
@@ -28,7 +25,6 @@ public class CoordinatorServer {
         Server server = new Server(8001);
         server.setHandler(new ShoppingHandler());
         server.start();
-//        server.join();
 
         // Localhost socket server
         IOThread ioThread;
@@ -71,6 +67,7 @@ public class CoordinatorServer {
             BufferedWriter out = SocketUtil.createOutputStream(value);
             message.setPort(key);
             message.setStage(stage);
+            message.setMsg("Commit failed, global rollback");
             SocketUtil.sendTransferMsg(out, message);
         });
     }

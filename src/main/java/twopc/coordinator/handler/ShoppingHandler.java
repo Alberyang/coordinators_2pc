@@ -23,7 +23,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 public class ShoppingHandler extends AbstractHandler {
-    private final CyclicBarrier cyclicBarrier = new CyclicBarrier(1);
+    public static ExecutorService executor = Executors.newFixedThreadPool(2);
+    private final CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
     private static Lock lock = new ReentrantLock();
 
     @Override
@@ -78,30 +79,27 @@ public class ShoppingHandler extends AbstractHandler {
         try{
             // Send Request
             CoordinatorServer.commitRequest(message);
+            // Wait for response
+            CoordinatorServer.participants.forEach((key, value) ->{
+                executor.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            // Concurrent control
+                            lock.lock();
 
-            CoordinatorServer.executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        // Concurrent control
-                        lock.lock();
-                        // Wait for response
-                        CoordinatorServer.participants.forEach((key, value) ->{
-                            try {
-                                BufferedReader in = SocketUtil.createInputStream(value);
-                                if (value != null && in != null) {
-                                    responses.add(SocketUtil.getResponse(in));
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                            BufferedReader in = SocketUtil.createInputStream(value);
+                            if (value != null && in != null) {
+                                responses.add(SocketUtil.getResponse(in));
                             }
-                        });
-                        // Concurrent control
-                        lock.unlock();
-                    } catch (Exception e) {
-                        e.printStackTrace();
+
+                            // Concurrent control
+                            lock.unlock();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
+                });
             });
 
             cyclicBarrier.await(30000, TimeUnit.MILLISECONDS);
@@ -140,29 +138,27 @@ public class ShoppingHandler extends AbstractHandler {
             // Send Request
             CoordinatorServer.commitRequest(message);
 
-            CoordinatorServer.executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        // Concurrent control
-                        lock.lock();
-                        // Wait for response
-                        CoordinatorServer.participants.forEach((key, value) ->{
-                            try {
-                                BufferedReader in = SocketUtil.createInputStream(value);
-                                if (value != null && in != null) {
-                                    responses.add(SocketUtil.getResponse(in));
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
+            // Wait for response
+            CoordinatorServer.participants.forEach((key, value) ->{
+                executor.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            // Concurrent control
+                            lock.lock();
+
+                            BufferedReader in = SocketUtil.createInputStream(value);
+                            if (value != null && in != null) {
+                                responses.add(SocketUtil.getResponse(in));
                             }
-                        });
-                        // Concurrent control
-                        lock.unlock();
-                    } catch (Exception e) {
-                        e.printStackTrace();
+
+                            // Concurrent control
+                            lock.unlock();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
+                });
             });
 
             cyclicBarrier.await(30000, TimeUnit.MILLISECONDS);
