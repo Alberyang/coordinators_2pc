@@ -52,7 +52,7 @@ public class ShoppingHandler extends AbstractHandler {
             if (!preCommit(message)){
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 System.out.println("Pre-commit Process Failed, Rollback to Previous");
-                CoordinatorServer.rollback(Stage.VOTE_ABORT, message);
+                CoordinatorServer.rollback(Stage.GLOBAL_ABORT, message);
                 return;
             }
 
@@ -101,6 +101,7 @@ public class ShoppingHandler extends AbstractHandler {
                     }
                 }
             });
+            CoordinatorServer.executor.shutdown();
 
             cyclicBarrier.await(3000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
@@ -157,6 +158,7 @@ public class ShoppingHandler extends AbstractHandler {
                     }
                 }
             });
+            CoordinatorServer.executor.shutdown();
 
             cyclicBarrier.await(3000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
