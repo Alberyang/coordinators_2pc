@@ -65,6 +65,22 @@ public class ShoppingHandler extends AbstractHandler {
             response.setStatus(HttpServletResponse.SC_OK);
             System.out.println("Transaction Process Completed.");
             System.out.println("-------------------------------------------------------------------");
+        } else if (target.equalsIgnoreCase("/no_2pc")) {
+            // Processing HTTP Request
+            String line;
+            TransferMessage message;
+            StringBuilder jsonString = new StringBuilder();
+            BufferedReader reader = request.getReader();
+            while ((line = reader.readLine()) != null) {
+                jsonString.append(line);
+            }
+            JSONObject requestJson = JSONObject.parseObject(jsonString.toString());
+
+            System.out.println("\n------------------------Transaction Start------------------------");
+            message = setTransferMessage(requestJson, Stage.INIT, "Simple commit");
+            simpleCommit(message);
+            System.out.println("Transaction Process Completed.");
+            System.out.println("-------------------------------------------------------------------");
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             System.out.println("Unknown type of operation");
@@ -201,6 +217,27 @@ public class ShoppingHandler extends AbstractHandler {
         // Do-Commit Unsuccessful
         System.out.println("System Do-Commit Failed");
         return false;
+    }
+
+    /**
+     * A simple commit function of transaction
+     * @param message - transaction needed to be process
+     */
+    private void simpleCommit(TransferMessage message){
+        // Send Request
+        message.setStage(Stage.VOTE_REQUEST);
+        CoordinatorServer.commitRequest(message);
+
+        // Wait a bit
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            System.out.println("Transaction Commit Failed");
+        }
+
+        // Send Request
+        message.setStage(Stage.GLOBAL_COMMIT);
+        CoordinatorServer.commitRequest(message);
     }
 
     /**
