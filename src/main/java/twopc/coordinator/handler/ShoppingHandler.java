@@ -26,7 +26,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class ShoppingHandler extends AbstractHandler {
     public static ExecutorService executor = Executors.newFixedThreadPool(2);
-    private final CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
     private static Lock lock = new ReentrantLock();
 
     @Override
@@ -79,13 +78,15 @@ public class ShoppingHandler extends AbstractHandler {
      * Pre-Commit Phase
      */
     private boolean preCommit(TransferMessage message) {
+        CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
         List<TransferMessage> responses = new ArrayList<>();
         try{
             // Send Request
             CoordinatorServer.commitRequest(message);
             // Wait for response
+
             for (Map.Entry<Integer, Socket> entry : CoordinatorServer.participants.entrySet()) {
-                executor.submit(new Runnable() {
+               new Thread(new Runnable(){
                     @Override
                     public void run() {
                         try {
@@ -102,17 +103,21 @@ public class ShoppingHandler extends AbstractHandler {
                                     System.out.println("The message this node received can not be identified");
                                 }
                             }
-
                             // Concurrent control
                             lock.unlock();
-                        } catch (IOException e) {
+
+                            cyclicBarrier.await();
+
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
-                });
+                }).start();
             }
 
-            cyclicBarrier.await(30000, TimeUnit.MILLISECONDS);
+            cyclicBarrier.await(3,TimeUnit.SECONDS);
+
+
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
             e.printStackTrace();
             System.out.println("System Pre-Commit Failed, Roll Back Operations");
@@ -144,14 +149,14 @@ public class ShoppingHandler extends AbstractHandler {
      * Do-Commit Phase
      */
     private boolean doCommit(TransferMessage message) {
+        CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
         List<TransferMessage> responses = new ArrayList<>();
         try{
             // Send Request
             CoordinatorServer.commitRequest(message);
-
             // Wait for response
             for (Map.Entry<Integer, Socket> entry : CoordinatorServer.participants.entrySet()) {
-                executor.submit(new Runnable() {
+                Thread thread = new Thread(new Runnable(){
                     @Override
                     public void run() {
                         try {
@@ -168,18 +173,22 @@ public class ShoppingHandler extends AbstractHandler {
                                     System.out.println("The message this node received can not be identified");
                                 }
                             }
-
                             // Concurrent control
                             lock.unlock();
-                        } catch (IOException e) {
+                            cyclicBarrier.await();
+
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
                 });
+                thread.start();
             }
 
-            cyclicBarrier.await(30000, TimeUnit.MILLISECONDS);
+            cyclicBarrier.await(3,TimeUnit.SECONDS);
+
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
+            e.printStackTrace();
             System.out.println("System Do-Commit Failed, Roll Back Operations");
             return false;
         }
