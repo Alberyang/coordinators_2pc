@@ -47,6 +47,7 @@ public class SocketUtil {
             out.write(JSONObject.toJSONString(transferMessage));
             out.flush();
             System.out.println("send to participant done");
+            System.out.println("已发送"+JSONObject.toJSONString(transferMessage));
         }catch (Exception e){
             e.printStackTrace();
             System.out.println("Error happened when send transfer message to server");

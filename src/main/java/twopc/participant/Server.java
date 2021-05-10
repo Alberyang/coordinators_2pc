@@ -46,16 +46,19 @@ public abstract class Server {
             System.out.println("It can't connect to the coordinator after reconnecting for 5 times");
             System.exit(-1);
         }
-        InputStream inputStream = null;
-        InputStreamReader inputStreamReader = null;
-        BufferedReader bufferedReader = null;
+//        InputStream inputStream = null;
+//        InputStreamReader inputStreamReader = null;
+//        BufferedReader bufferedReader = null;
+        BufferedReader in = SocketUtil.createInputStream(socket);
         while(true) {
             try {
-                inputStream = socket.getInputStream();
-                inputStreamReader = new InputStreamReader(inputStream);
-                bufferedReader = new BufferedReader(inputStreamReader);
+
+//                inputStream = socket.getInputStream();
+//                inputStreamReader = new InputStreamReader(inputStream);
+//                bufferedReader = new BufferedReader(inputStreamReader);
                 String temp = null;
-                while ((temp = bufferedReader.readLine())!=null) {
+                while ((temp = in.readLine())!=null) {
+
                     TransferMessage transferMessage = null;
                     try {
                          transferMessage = SocketUtil.parseTransferMessage(temp);
@@ -80,14 +83,8 @@ public abstract class Server {
                 e.printStackTrace();
                 System.out.println("Error, closing the connection with coordinator");
                 try {
-                    if (inputStream != null) {
-                        inputStream.close();
-                    }
-                    if (inputStreamReader != null) {
-                        inputStreamReader.close();
-                    }
-                    if (bufferedReader != null) {
-                        bufferedReader.close();
+                    if (in != null) {
+                        in.close();
                     }
                     if (!socket.isClosed()) {
                         socket.close();

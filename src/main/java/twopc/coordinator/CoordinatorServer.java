@@ -31,7 +31,7 @@ public class CoordinatorServer {
         Server server = new Server(8001);
         server.setHandler(new ShoppingHandler());
         server.start();
-        server.join();
+//        server.join();
 
         // Localhost socket server
         IOThread ioThread;
