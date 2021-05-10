@@ -101,13 +101,12 @@ public class ShoppingHandler extends AbstractHandler {
             // Wait for response
             for (Map.Entry<Integer, Socket> entry : CoordinatorServer.participants.entrySet()) {
                new Thread(() -> {
-                   // Concurrent control
-
                    try {
                        // Receive responses
                        BufferedReader in = SocketUtil.createInputStream(entry.getValue());
                        if (entry.getValue() != null) {
                            TransferMessage msg = SocketUtil.getResponse(in);
+                           // Concurrent control
                            lock.lock();
                            if (msg != null) {
                                responses.add(msg);
@@ -115,6 +114,7 @@ public class ShoppingHandler extends AbstractHandler {
                            } else {
                                System.out.println("The message this node received can not be identified");
                            }
+                           // Concurrent control
                            lock.unlock();
                        }
                        cyclicBarrier.await();
@@ -122,8 +122,6 @@ public class ShoppingHandler extends AbstractHandler {
                        e.printStackTrace();
                        System.out.println("Receive socket down");
                    }
-                   // Concurrent control
-
                }).start();
             }
             cyclicBarrier.await();
@@ -167,14 +165,12 @@ public class ShoppingHandler extends AbstractHandler {
             // Wait for response
             for (Map.Entry<Integer, Socket> entry : CoordinatorServer.participants.entrySet()) {
                 new Thread(() -> {
-                    // Concurrent control
-
                     try {
-
                         // Receive response
                         BufferedReader in = SocketUtil.createInputStream(entry.getValue());
                         if (entry.getValue() != null) {
                             TransferMessage msg = SocketUtil.getResponse(in);
+                            // Concurrent control
                             lock.lock();
                             if (msg != null) {
                                 responses.add(msg);
@@ -182,16 +178,14 @@ public class ShoppingHandler extends AbstractHandler {
                             } else {
                                 System.out.println("The message this node received can not be identified");
                             }
+                            // Concurrent control
                             lock.unlock();
                         }
-
                         cyclicBarrier.await();
                     } catch (InterruptedException | BrokenBarrierException | IOException e) {
                         e.printStackTrace();
                         System.out.println("Receive socket down");
                     }
-                    // Concurrent control
-
                 }).start();
             }
             cyclicBarrier.await();
