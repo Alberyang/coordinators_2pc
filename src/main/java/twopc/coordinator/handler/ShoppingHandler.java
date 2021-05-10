@@ -14,16 +14,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 
 public class ShoppingHandler extends AbstractHandler {
-    public static ExecutorService executor = Executors.newFixedThreadPool(5);
+    public static ExecutorService executor = Executors.newFixedThreadPool(2);
     private final CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
     private static Lock lock = new ReentrantLock();
 
@@ -82,7 +84,7 @@ public class ShoppingHandler extends AbstractHandler {
             // Send Request
             CoordinatorServer.commitRequest(message);
             // Wait for response
-            CoordinatorServer.participants.forEach((key, value) ->{
+            for (Map.Entry<Integer, Socket> entry : CoordinatorServer.participants.entrySet()) {
                 executor.submit(new Runnable() {
                     @Override
                     public void run() {
@@ -90,12 +92,12 @@ public class ShoppingHandler extends AbstractHandler {
                             // Concurrent control
                             lock.lock();
 
-                            BufferedReader in = SocketUtil.createInputStream(value);
-                            if (value != null && in != null) {
+                            BufferedReader in = SocketUtil.createInputStream(entry.getValue());
+                            if (entry.getValue() != null && in != null) {
                                 TransferMessage msg = SocketUtil.getResponse(in);
-                                if(msg!=null){
+                                if (msg != null) {
                                     responses.add(msg);
-                                    System.out.println("This node received the message "+ msg);
+                                    System.out.println("This node received the message " + msg);
                                 } else {
                                     System.out.println("The message this node received can not be identified");
                                 }
@@ -108,7 +110,7 @@ public class ShoppingHandler extends AbstractHandler {
                         }
                     }
                 });
-            });
+            }
 
             cyclicBarrier.await(30000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
@@ -148,7 +150,7 @@ public class ShoppingHandler extends AbstractHandler {
             CoordinatorServer.commitRequest(message);
 
             // Wait for response
-            CoordinatorServer.participants.forEach((key, value) ->{
+            for (Map.Entry<Integer, Socket> entry : CoordinatorServer.participants.entrySet()) {
                 executor.submit(new Runnable() {
                     @Override
                     public void run() {
@@ -156,12 +158,12 @@ public class ShoppingHandler extends AbstractHandler {
                             // Concurrent control
                             lock.lock();
 
-                            BufferedReader in = SocketUtil.createInputStream(value);
-                            if (value != null && in != null) {
+                            BufferedReader in = SocketUtil.createInputStream(entry.getValue());
+                            if (entry.getValue() != null && in != null) {
                                 TransferMessage msg = SocketUtil.getResponse(in);
-                                if(msg!=null){
+                                if (msg != null) {
                                     responses.add(msg);
-                                    System.out.println("This node received the message "+ msg);
+                                    System.out.println("This node received the message " + msg);
                                 } else {
                                     System.out.println("The message this node received can not be identified");
                                 }
@@ -174,7 +176,7 @@ public class ShoppingHandler extends AbstractHandler {
                         }
                     }
                 });
-            });
+            }
 
             cyclicBarrier.await(30000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
