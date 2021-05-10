@@ -1,9 +1,6 @@
 package twopc.common;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 public enum Stage {
@@ -24,6 +21,4 @@ public enum Stage {
     Stage(int code) {
         this.code = code;
     }
-
-
 }

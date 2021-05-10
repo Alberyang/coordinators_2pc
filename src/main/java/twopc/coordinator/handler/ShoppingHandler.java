@@ -22,7 +22,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-
 public class ShoppingHandler extends AbstractHandler {
     private static final Lock lock = new ReentrantLock();
 
@@ -99,31 +98,29 @@ public class ShoppingHandler extends AbstractHandler {
             CoordinatorServer.commitRequest(message);
             // Wait for response
             for (Map.Entry<Integer, Socket> entry : CoordinatorServer.participants.entrySet()) {
-               new Thread(new Runnable(){
-                    @Override
-                    public void run() {
-                        try {
-                            // Concurrent control
-                            lock.lock();
-                            // Receive responses
-                            BufferedReader in = SocketUtil.createInputStream(entry.getValue());
-                            if (entry.getValue() != null && in != null) {
-                                TransferMessage msg = SocketUtil.getResponse(in);
-                                if (msg != null) {
-                                    responses.add(msg);
-                                    System.out.println("This node received the message " + msg);
-                                } else {
-                                    System.out.println("The message this node received can not be identified");
-                                }
-                            }
-                            // Concurrent control
-                            lock.unlock();
-                            cyclicBarrier.await();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
+               new Thread(() -> {
+                   try {
+                       // Concurrent control
+                       lock.lock();
+                       // Receive responses
+                       BufferedReader in = SocketUtil.createInputStream(entry.getValue());
+                       if (entry.getValue() != null) {
+                           TransferMessage msg = SocketUtil.getResponse(in);
+                           if (msg != null) {
+                               responses.add(msg);
+                               System.out.println("This node received the message " + msg);
+                           } else {
+                               System.out.println("The message this node received can not be identified");
+                           }
+                       }
+                       // Concurrent control
+                       lock.unlock();
+                       cyclicBarrier.await();
+                   } catch (InterruptedException | BrokenBarrierException | IOException e) {
+                       e.printStackTrace();
+                       System.out.println("Receive socket down");
+                   }
+               }).start();
             }
             cyclicBarrier.await();
         } catch (InterruptedException | BrokenBarrierException e) {
@@ -165,32 +162,29 @@ public class ShoppingHandler extends AbstractHandler {
             CoordinatorServer.commitRequest(message);
             // Wait for response
             for (Map.Entry<Integer, Socket> entry : CoordinatorServer.participants.entrySet()) {
-                Thread thread = new Thread(new Runnable(){
-                    @Override
-                    public void run() {
-                        try {
-                            // Concurrent control
-                            lock.lock();
-                            // Receive response
-                            BufferedReader in = SocketUtil.createInputStream(entry.getValue());
-                            if (entry.getValue() != null && in != null) {
-                                TransferMessage msg = SocketUtil.getResponse(in);
-                                if (msg != null) {
-                                    responses.add(msg);
-                                    System.out.println("This node received the message " + msg);
-                                } else {
-                                    System.out.println("The message this node received can not be identified");
-                                }
+                new Thread(() -> {
+                    try {
+                        // Concurrent control
+                        lock.lock();
+                        // Receive response
+                        BufferedReader in = SocketUtil.createInputStream(entry.getValue());
+                        if (entry.getValue() != null) {
+                            TransferMessage msg = SocketUtil.getResponse(in);
+                            if (msg != null) {
+                                responses.add(msg);
+                                System.out.println("This node received the message " + msg);
+                            } else {
+                                System.out.println("The message this node received can not be identified");
                             }
-                            // Concurrent control
-                            lock.unlock();
-                            cyclicBarrier.await();
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
+                        // Concurrent control
+                        lock.unlock();
+                        cyclicBarrier.await();
+                    } catch (InterruptedException | BrokenBarrierException | IOException e) {
+                        e.printStackTrace();
+                        System.out.println("Receive socket down");
                     }
-                });
-                thread.start();
+                }).start();
             }
             cyclicBarrier.await();
         } catch (InterruptedException | BrokenBarrierException e) {
@@ -198,6 +192,7 @@ public class ShoppingHandler extends AbstractHandler {
             System.out.println("System Do-Commit Failed, Roll Back Operations");
             return false;
         }
+
         if (cyclicBarrier.getNumberWaiting() == 0) {
             for (TransferMessage response : responses) {
                 if (response.getStage() != Stage.COMMIT_SUCCESS) {
