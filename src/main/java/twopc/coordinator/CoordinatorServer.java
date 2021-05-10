@@ -18,7 +18,7 @@ public class CoordinatorServer {
     private static final int port = 9000;
 
     /**
-     * Socket client
+     * Setup the Coordinator server with HTTP server and Socket server
      */
     public void run() throws Exception{
         // HTTP Server
@@ -43,14 +43,23 @@ public class CoordinatorServer {
             // just make sure the ioThread is going to terminate
             ioThread.shutDown();
         }
+        server.join();
     }
 
+    /**
+     * Accept a client socket connect request
+     * @param socket - client socket
+     */
     public void acceptClient(Socket socket){
         int clientPort = socket.getPort();
         participants.put(clientPort, socket);
         log.info("Server:" + clientPort + " is online.");
     }
 
+    /**
+     * Send out the commit request to participants
+     * @param message - transfer message needed to be sent
+     */
     public static void commitRequest(TransferMessage message){
         // Send commit request
         participants.forEach((key, value) -> {
@@ -60,6 +69,11 @@ public class CoordinatorServer {
         });
     }
 
+    /**
+     * Send out rollback request to participants
+     * @param stage - current stage of rollback
+     * @param message - message needed to be rollback
+     */
     public static void rollback(Stage stage, TransferMessage message){
         // Rollback request
         participants.forEach((key, value) -> {

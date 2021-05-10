@@ -9,7 +9,6 @@ import twopc.common.TransferMessage;
 import twopc.coordinator.CoordinatorServer;
 import utils.SocketUtil;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
@@ -25,12 +24,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 public class ShoppingHandler extends AbstractHandler {
-    public static ExecutorService executor = Executors.newFixedThreadPool(2);
-    private static Lock lock = new ReentrantLock();
+    private static final Lock lock = new ReentrantLock();
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request,
-                       HttpServletResponse response) throws IOException, ServletException {
+                       HttpServletResponse response) throws IOException {
         // Http Servlet Settings
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=utf-8");
@@ -75,6 +73,7 @@ public class ShoppingHandler extends AbstractHandler {
 
     /**
      * Pre-Commit Phase
+     * @param message - transaction needed to be process
      */
     private boolean preCommit(TransferMessage message) {
         CyclicBarrier cyclicBarrier = new CyclicBarrier(3);
@@ -83,7 +82,6 @@ public class ShoppingHandler extends AbstractHandler {
             // Send Request
             CoordinatorServer.commitRequest(message);
             // Wait for response
-
             for (Map.Entry<Integer, Socket> entry : CoordinatorServer.participants.entrySet()) {
                new Thread(new Runnable(){
                     @Override
@@ -91,7 +89,7 @@ public class ShoppingHandler extends AbstractHandler {
                         try {
                             // Concurrent control
                             lock.lock();
-
+                            // Receive responses
                             BufferedReader in = SocketUtil.createInputStream(entry.getValue());
                             if (entry.getValue() != null && in != null) {
                                 TransferMessage msg = SocketUtil.getResponse(in);
@@ -104,20 +102,15 @@ public class ShoppingHandler extends AbstractHandler {
                             }
                             // Concurrent control
                             lock.unlock();
-
                             cyclicBarrier.await();
-
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
                 }).start();
             }
-
-            cyclicBarrier.await(3,TimeUnit.SECONDS);
-
-
-        } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
+            cyclicBarrier.await();
+        } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
             System.out.println("System Pre-Commit Failed, Roll Back Operations");
             return false;
@@ -136,16 +129,17 @@ public class ShoppingHandler extends AbstractHandler {
                 System.out.println("System Pre-Commit Done");
                 return true;
             }
-            System.out.println("System Pre-Commit Failed: response timeout");
         } else {
             // Pre-Commit Unsuccessful
-            System.out.println("System Pre-Commit Failed");
+            System.out.println("System Pre-Commit Failed: response timeout");
         }
+        System.out.println("System Pre-Commit Failed");
         return false;
     }
 
     /**
      * Do-Commit Phase
+     * @param message - transaction needed to be process
      */
     private boolean doCommit(TransferMessage message) {
         CyclicBarrier cyclicBarrier = new CyclicBarrier(3);
@@ -161,7 +155,7 @@ public class ShoppingHandler extends AbstractHandler {
                         try {
                             // Concurrent control
                             lock.lock();
-
+                            // Receive response
                             BufferedReader in = SocketUtil.createInputStream(entry.getValue());
                             if (entry.getValue() != null && in != null) {
                                 TransferMessage msg = SocketUtil.getResponse(in);
@@ -175,7 +169,6 @@ public class ShoppingHandler extends AbstractHandler {
                             // Concurrent control
                             lock.unlock();
                             cyclicBarrier.await();
-
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -183,10 +176,8 @@ public class ShoppingHandler extends AbstractHandler {
                 });
                 thread.start();
             }
-
-            cyclicBarrier.await(3,TimeUnit.SECONDS);
-
-        } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
+            cyclicBarrier.await();
+        } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
             System.out.println("System Do-Commit Failed, Roll Back Operations");
             return false;
@@ -204,16 +195,19 @@ public class ShoppingHandler extends AbstractHandler {
                 System.out.println("System Do-Commit Done");
                 return true;
             }
-            System.out.println("System Do-Commit Failed: response timeout");
         } else {
-            // Do-Commit Unsuccessful
-            System.out.println("System Do-Commit Failed");
+            System.out.println("System Do-Commit Failed: response timeout");
         }
+        // Do-Commit Unsuccessful
+        System.out.println("System Do-Commit Failed");
         return false;
     }
 
     /**
      * Generate transfer message
+     * @param jsonData - json data from http request about the transaction
+     * @param msg - text message needed to be sent to the participants
+     * @param stage - current commit stage
      */
     private TransferMessage setTransferMessage(JSONObject jsonData, Stage stage, String msg){
         TransferMessage message = new TransferMessage();
@@ -231,7 +225,6 @@ public class ShoppingHandler extends AbstractHandler {
         message.setFrom("Coordinator");
         message.setTo("Server");
         message.setMsg(msg);
-
         return message;
     }
 }

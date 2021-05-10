@@ -25,7 +25,6 @@ public class SocketUtil {
             BufferedWriter out = new BufferedWriter(outputStreamWriter);
             return out;
         }catch (Exception e){
-            e.printStackTrace();
             System.out.println("Error happened when create outputsteam object");
         }
         return null;
@@ -38,7 +37,6 @@ public class SocketUtil {
             out.flush();
             System.out.println("Message" + JSONObject.toJSONString(transferMessage) + "has been successfully sent to coordinator");
         }catch (Exception e){
-            e.printStackTrace();
             System.out.println("Error happened when response transfer message to server");
         }
     }
@@ -61,7 +59,6 @@ public class SocketUtil {
             BufferedReader in = new BufferedReader(inputStreamReader);
             return in;
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("Error happened when create the inputstream");
         }
         return null;
