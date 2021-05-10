@@ -76,11 +76,6 @@ public class SocketUtil {
             } catch (Exception e) {
                 System.out.println("Msg from coordinator can not be parsed as the object TransferMessage");
             }
-            if(transferMessage!=null){
-                System.out.println("This node received the message "+ transferMessage);
-            }else {
-                System.out.println("The message this node received can not be identified");
-            }
         }
         return transferMessage;
     }

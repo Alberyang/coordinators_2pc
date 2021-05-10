@@ -38,12 +38,11 @@ public class CoordinatorServer {
         try {
             // just wait for this thread to terminate
             ioThread.join();
+            log.info("io thread has joined");
         } catch (InterruptedException e) {
             // just make sure the ioThread is going to terminate
             ioThread.shutDown();
         }
-
-        log.info("io thread has joined");
     }
 
     public void acceptClient(Socket socket){

@@ -23,7 +23,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
 public class ShoppingHandler extends AbstractHandler {
-    public static ExecutorService executor = Executors.newFixedThreadPool(2);
+    public static ExecutorService executor = Executors.newFixedThreadPool(5);
     private final CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
     private static Lock lock = new ReentrantLock();
 
@@ -92,7 +92,13 @@ public class ShoppingHandler extends AbstractHandler {
 
                             BufferedReader in = SocketUtil.createInputStream(value);
                             if (value != null && in != null) {
-                                responses.add(SocketUtil.getResponse(in));
+                                TransferMessage msg = SocketUtil.getResponse(in);
+                                if(msg!=null){
+                                    responses.add(msg);
+                                    System.out.println("This node received the message "+ msg);
+                                } else {
+                                    System.out.println("The message this node received can not be identified");
+                                }
                             }
 
                             // Concurrent control
@@ -151,7 +157,13 @@ public class ShoppingHandler extends AbstractHandler {
 
                             BufferedReader in = SocketUtil.createInputStream(value);
                             if (value != null && in != null) {
-                                responses.add(SocketUtil.getResponse(in));
+                                TransferMessage msg = SocketUtil.getResponse(in);
+                                if(msg!=null){
+                                    responses.add(msg);
+                                    System.out.println("This node received the message "+ msg);
+                                } else {
+                                    System.out.println("The message this node received can not be identified");
+                                }
                             }
 
                             // Concurrent control
