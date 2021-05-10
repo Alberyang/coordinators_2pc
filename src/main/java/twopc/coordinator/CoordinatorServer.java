@@ -68,9 +68,8 @@ public class CoordinatorServer {
         });
     }
 
-    public static void rollback(Stage stage){
+    public static void rollback(Stage stage, TransferMessage message){
         // Rollback request
-        TransferMessage message = new TransferMessage();
         participants.forEach((key, value) -> {
             BufferedWriter out = SocketUtil.createOutputStream(value);
             message.setPort(key);

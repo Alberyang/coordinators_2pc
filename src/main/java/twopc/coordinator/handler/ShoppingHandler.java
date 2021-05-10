@@ -40,6 +40,7 @@ public class ShoppingHandler extends AbstractHandler {
         if (target.equalsIgnoreCase("/shopping")) {
             // Processing HTTP Request
             String line;
+            TransferMessage message;
             StringBuilder jsonString = new StringBuilder();
             BufferedReader reader = request.getReader();
             while ((line = reader.readLine()) != null) {
@@ -47,17 +48,19 @@ public class ShoppingHandler extends AbstractHandler {
             }
             JSONObject requestJson = JSONObject.parseObject(jsonString.toString());
 
-            if (!preCommit(requestJson)){
+            message = setTransferMessage(requestJson, Stage.VOTE_REQUEST, "Request Pre-Commit Voting");
+            if (!preCommit(message)){
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 System.out.println("Pre-commit Process Failed, Rollback to Previous");
-                CoordinatorServer.rollback(Stage.VOTE_ABORT);
+                CoordinatorServer.rollback(Stage.VOTE_ABORT, message);
                 return;
             }
 
-            if (!doCommit(requestJson)){
+            message = setTransferMessage(requestJson, Stage.GLOBAL_COMMIT, "Request Global Commit");
+            if (!doCommit(message)){
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 System.out.println("Do-commit Process Failed, Rollback to Previous");
-                CoordinatorServer.rollback(Stage.GLOBAL_ABORT);
+                CoordinatorServer.rollback(Stage.GLOBAL_ABORT, message);
                 return;
             }
 
@@ -72,23 +75,30 @@ public class ShoppingHandler extends AbstractHandler {
     /**
      * Pre-Commit Phase
      */
-    private boolean preCommit(JSONObject jsonData) {
-        final String msg = "Request Pre-Commit Voting";
+    private boolean preCommit(TransferMessage message) {
         List<TransferMessage> responses = new ArrayList<>();
-        TransferMessage message = setTransferMessage(jsonData, Stage.VOTE_REQUEST, msg);
         try{
             // Send Request
             CoordinatorServer.commitRequest(message);
 
-            // Wait for response
-            CoordinatorServer.participants.forEach((key, value) ->{
-                try {
-                    BufferedReader in = SocketUtil.createInputStream(value);
-                    if (value != null && in != null) {
-                        responses.add(SocketUtil.getResponse(in));
+            CoordinatorServer.executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // Wait for response
+                        CoordinatorServer.participants.forEach((key, value) ->{
+                            try {
+                                BufferedReader in = SocketUtil.createInputStream(value);
+                                if (value != null && in != null) {
+                                    responses.add(SocketUtil.getResponse(in));
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
             });
 
@@ -121,23 +131,30 @@ public class ShoppingHandler extends AbstractHandler {
     /**
      * Do-Commit Phase
      */
-    private boolean doCommit(JSONObject jsonData) {
-        final String msg = "Request Global Commit";
+    private boolean doCommit(TransferMessage message) {
         List<TransferMessage> responses = new ArrayList<>();
-        TransferMessage message = setTransferMessage(jsonData, Stage.GLOBAL_COMMIT, msg);
         try{
             // Send Request
             CoordinatorServer.commitRequest(message);
 
-            // Wait for response
-            CoordinatorServer.participants.forEach((key, value) ->{
-                try {
-                    BufferedReader in = SocketUtil.createInputStream(value);
-                    if (value != null && in != null) {
-                        responses.add(SocketUtil.getResponse(in));
+            CoordinatorServer.executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // Wait for response
+                        CoordinatorServer.participants.forEach((key, value) ->{
+                            try {
+                                BufferedReader in = SocketUtil.createInputStream(value);
+                                if (value != null && in != null) {
+                                    responses.add(SocketUtil.getResponse(in));
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
             });
 
