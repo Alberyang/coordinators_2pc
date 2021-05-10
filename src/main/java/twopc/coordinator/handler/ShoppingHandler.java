@@ -6,7 +6,6 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import twopc.common.ShoppingCart;
 import twopc.common.Stage;
 import twopc.common.TransferMessage;
-import twopc.coordinator.Coordinator;
 import twopc.coordinator.CoordinatorServer;
 import utils.SocketUtil;
 
@@ -19,14 +18,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.logging.Logger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 
 public class ShoppingHandler extends AbstractHandler {
-    private static final Logger log = Logger.getLogger(ShoppingHandler.class.getName());
     private final CyclicBarrier cyclicBarrier = new CyclicBarrier(1);
-//    private Coordinator coordinator;
-
-//    public ShoppingHandler(Coordinator coordinator){this.coordinator = coordinator}
+    private static Lock lock = new ReentrantLock();
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request,
@@ -85,6 +83,8 @@ public class ShoppingHandler extends AbstractHandler {
                 @Override
                 public void run() {
                     try {
+                        // Concurrent control
+                        lock.lock();
                         // Wait for response
                         CoordinatorServer.participants.forEach((key, value) ->{
                             try {
@@ -96,6 +96,8 @@ public class ShoppingHandler extends AbstractHandler {
                                 e.printStackTrace();
                             }
                         });
+                        // Concurrent control
+                        lock.unlock();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -105,7 +107,6 @@ public class ShoppingHandler extends AbstractHandler {
             cyclicBarrier.await(30000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
             System.out.println("System Pre-Commit Failed, Roll Back Operations");
-            // Rollback Operation
             return false;
         }
 
@@ -118,13 +119,16 @@ public class ShoppingHandler extends AbstractHandler {
                 }
             }
             // Pre-Commit Successful
-            System.out.println("System Pre-Commit Done");
-            return true;
+            if (!responses.isEmpty()) {
+                System.out.println("System Pre-Commit Done");
+                return true;
+            }
+            System.out.println("System Pre-Commit Failed: response timeout");
         } else {
             // Pre-Commit Unsuccessful
             System.out.println("System Pre-Commit Failed");
-            return false;
         }
+        return false;
     }
 
     /**
@@ -140,6 +144,8 @@ public class ShoppingHandler extends AbstractHandler {
                 @Override
                 public void run() {
                     try {
+                        // Concurrent control
+                        lock.lock();
                         // Wait for response
                         CoordinatorServer.participants.forEach((key, value) ->{
                             try {
@@ -151,6 +157,8 @@ public class ShoppingHandler extends AbstractHandler {
                                 e.printStackTrace();
                             }
                         });
+                        // Concurrent control
+                        lock.unlock();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -160,7 +168,6 @@ public class ShoppingHandler extends AbstractHandler {
             cyclicBarrier.await(30000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
             System.out.println("System Do-Commit Failed, Roll Back Operations");
-            // Rollback Operation
             return false;
         }
         if (cyclicBarrier.getNumberWaiting() == 0) {
@@ -172,13 +179,16 @@ public class ShoppingHandler extends AbstractHandler {
                 }
             }
             // Do-Commit Successful
-            System.out.println("System Do-Commit Done");
-            return true;
+            if (!responses.isEmpty()) {
+                System.out.println("System Do-Commit Done");
+                return true;
+            }
+            System.out.println("System Do-Commit Failed: response timeout");
         } else {
             // Do-Commit Unsuccessful
             System.out.println("System Do-Commit Failed");
-            return false;
         }
+        return false;
     }
 
     /**
@@ -189,7 +199,7 @@ public class ShoppingHandler extends AbstractHandler {
 
         // Process Shopping Cart
         ShoppingCart cart = new ShoppingCart();
-        cart.setCart(new HashMap<String, Integer>());
+        cart.setCart(new HashMap<>());
         cart.buyiPhone(jsonData.getIntValue("iPhone"));
         cart.buyiMac(jsonData.getIntValue("iMac"));
         cart.buyiPad(jsonData.getIntValue("iPad"));

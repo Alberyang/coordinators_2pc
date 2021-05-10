@@ -6,15 +6,12 @@ import twopc.common.TransferMessage;
 import twopc.coordinator.handler.ShoppingHandler;
 import utils.SocketUtil;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 public class CoordinatorServer {
