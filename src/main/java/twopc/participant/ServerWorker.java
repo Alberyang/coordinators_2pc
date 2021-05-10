@@ -60,6 +60,7 @@ public class ServerWorker {
                     this.sqlConnection.close();
                     transferMessage.setMsg("This database commit successully");
                     transferMessage.setStage(Stage.COMMIT_SUCCESS);
+                    System.out.println("The execution of this transaction of shopping is completed");
                 }
             }catch (Exception e){
                 e.printStackTrace();

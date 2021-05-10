@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 
 public class ShoppingHandler extends AbstractHandler {
     private static final Logger log = Logger.getLogger(ShoppingHandler.class.getName());
-    private final CyclicBarrier cyclicBarrier = new CyclicBarrier(4);
+    private final CyclicBarrier cyclicBarrier = new CyclicBarrier(1);
 //    private Coordinator coordinator;
 
 //    public ShoppingHandler(Coordinator coordinator){this.coordinator = coordinator}
@@ -65,10 +65,10 @@ public class ShoppingHandler extends AbstractHandler {
             }
 
             response.setStatus(HttpServletResponse.SC_OK);
-            log.info("Transaction Process Completed.");
+            System.out.println("Transaction Process Completed.");
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            log.info("Unknown type of operation");
+            System.out.println("Unknown type of operation");
         }
     }
 
@@ -101,30 +101,28 @@ public class ShoppingHandler extends AbstractHandler {
                     }
                 }
             });
-            CoordinatorServer.executor.shutdown();
 
-            cyclicBarrier.await(3000, TimeUnit.MILLISECONDS);
+            cyclicBarrier.await(30000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
-            log.severe(e.toString());
-            log.severe("System Pre-Commit Failed, Roll Back Operations");
+            System.out.println("System Pre-Commit Failed, Roll Back Operations");
             // Rollback Operation
             return false;
         }
 
         if (cyclicBarrier.getNumberWaiting() == 0) {
             for (TransferMessage response : responses) {
-                if (response.getStage() != Stage.COMMIT_SUCCESS) {
-                    log.warning("Participant:" + response.getPort() + " Pre-commit failed");
+                if (response.getStage() != Stage.VOTE_COMMIT) {
+                    System.out.println("Participant:" + response.getPort() + " Pre-commit failed");
                     System.out.println(response.getMsg());
                     return false;
                 }
             }
             // Pre-Commit Successful
-            log.info("System Pre-Commit Done");
+            System.out.println("System Pre-Commit Done");
             return true;
         } else {
             // Pre-Commit Unsuccessful
-            log.warning("System Pre-Commit Failed");
+            System.out.println("System Pre-Commit Failed");
             return false;
         }
     }
@@ -158,28 +156,27 @@ public class ShoppingHandler extends AbstractHandler {
                     }
                 }
             });
-            CoordinatorServer.executor.shutdown();
 
-            cyclicBarrier.await(3000, TimeUnit.MILLISECONDS);
+            cyclicBarrier.await(30000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
-            log.severe("System Do-Commit Failed, Roll Back Operations");
+            System.out.println("System Do-Commit Failed, Roll Back Operations");
             // Rollback Operation
             return false;
         }
         if (cyclicBarrier.getNumberWaiting() == 0) {
             for (TransferMessage response : responses) {
                 if (response.getStage() != Stage.COMMIT_SUCCESS) {
-                    log.warning("Participant:" + response.getPort() + " Do-commit failed");
+                    System.out.println("Participant:" + response.getPort() + " Do-commit failed");
                     System.out.println(response.getMsg());
                     return false;
                 }
             }
             // Do-Commit Successful
-            log.info("System Do-Commit Done");
+            System.out.println("System Do-Commit Done");
             return true;
         } else {
             // Do-Commit Unsuccessful
-            log.warning("System Do-Commit Failed");
+            System.out.println("System Do-Commit Failed");
             return false;
         }
     }

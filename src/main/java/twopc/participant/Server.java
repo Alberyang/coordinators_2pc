@@ -57,7 +57,6 @@ public abstract class Server {
 //                bufferedReader = new BufferedReader(inputStreamReader);
                 String temp = null;
                 while ((temp = in.readLine())!=null) {
-
                     TransferMessage transferMessage = null;
                     try {
                          transferMessage = SocketUtil.parseTransferMessage(temp);
@@ -65,7 +64,6 @@ public abstract class Server {
                         System.out.println("Msg from coordinator can not be parsed as the object TransferMessage");
                         continue;
                     }
-
                     if(sqlConnection==null){
                         this.sqlConnection = DbUtils.getConnection(this.database);
                     }
