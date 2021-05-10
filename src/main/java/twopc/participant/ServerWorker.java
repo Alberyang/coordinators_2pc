@@ -27,6 +27,8 @@ public class ServerWorker {
         Integer port = transferMessage.getPort();
         BufferedWriter out = SocketUtil.createOutputStream(this.coConnection);
         SqlServiceImpl sqlService = new SqlServiceImpl(sqlConnection,transferMessage);
+        transferMessage.setFrom("Server");
+        transferMessage.setTo("Coordinator");
         //first phase: vote-request / pre-commit
         if(transferMessage.getStage().getCode()==1){
             System.out.println("Current stage is "+ transferMessage.getStage());
@@ -84,7 +86,6 @@ public class ServerWorker {
                 transferMessage.setStage(Stage.INIT);
 
             } catch (SQLException throwables) {
-                throwables.printStackTrace();
                 transferMessage.setMsg("This database rollback fails");
                 transferMessage.setStage(Stage.ABORT);
             }finally {

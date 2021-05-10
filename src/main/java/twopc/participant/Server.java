@@ -52,7 +52,6 @@ public abstract class Server {
         BufferedReader in = SocketUtil.createInputStream(socket);
         while(true) {
             try {
-
 //                inputStream = socket.getInputStream();
 //                inputStreamReader = new InputStreamReader(inputStream);
 //                bufferedReader = new BufferedReader(inputStreamReader);
@@ -71,7 +70,7 @@ public abstract class Server {
                         this.sqlConnection = DbUtils.getConnection(this.database);
                     }
                     if(transferMessage!=null){
-                        System.out.println("This server received the object 'TransferMessage'");
+                        System.out.println("This server received the message "+transferMessage);
                         ServerWorker orderServerWorker = new ServerWorker(socket, sqlConnection,transferMessage);
                         orderServerWorker.work();
                     }else {
@@ -79,9 +78,9 @@ public abstract class Server {
                     }
                 }
 
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("Error, closing the connection with coordinator");
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                System.out.println("Error, closing the connection with coordinator, the server will be stopped!");
                 try {
                     if (in != null) {
                         in.close();
@@ -90,11 +89,13 @@ public abstract class Server {
                         socket.close();
                     }
 
-                } catch (Exception e1) {
-                    e1.printStackTrace();
+                } catch (Exception e2) {
+                    e2.printStackTrace();
                 }
+                System.exit(-1);
 
-                System.out.println("Fetal Error! The server has stopped!");
+            }catch (Exception e){
+                e.printStackTrace();
             }
         }
     }

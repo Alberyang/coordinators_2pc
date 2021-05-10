@@ -34,8 +34,9 @@ public class SocketUtil {
         try{
             System.out.println("ready to send to coordinator");
             out.write(JSONObject.toJSONString(transferMessage));
+            out.write("\n");
             out.flush();
-            System.out.println("send to coordinator done");
+            System.out.println("Message" + JSONObject.toJSONString(transferMessage) + "has been successfully sent to coordinator");
         }catch (Exception e){
             e.printStackTrace();
             System.out.println("Error happened when response transfer message to server");
@@ -43,14 +44,14 @@ public class SocketUtil {
     }
     public static void sendTransferMsg(BufferedWriter out,TransferMessage transferMessage){
         try{
-            System.out.println("ready to send to participant");
+            System.out.println("ready to send message to servers");
             out.write(JSONObject.toJSONString(transferMessage));
+            out.write("\n");
             out.flush();
-            System.out.println("send to participant done");
-            System.out.println("已发送"+JSONObject.toJSONString(transferMessage));
+            System.out.println("Message" + JSONObject.toJSONString(transferMessage) + "has been successfully sent to servers");
         }catch (Exception e){
             e.printStackTrace();
-            System.out.println("Error happened when send transfer message to server");
+            System.out.println("Error happened when send transfer message to servers");
         }
     }
     public static BufferedReader createInputStream(Socket coConection){
@@ -76,9 +77,9 @@ public class SocketUtil {
                 System.out.println("Msg from coordinator can not be parsed as the object TransferMessage");
             }
             if(transferMessage!=null){
-                System.out.println("This server received the object 'TransferMessage'");
+                System.out.println("This node received the message "+ transferMessage);
             }else {
-                System.out.println("The message server received can not be identified");
+                System.out.println("The message this node received can not be identified");
             }
         }
         return transferMessage;
