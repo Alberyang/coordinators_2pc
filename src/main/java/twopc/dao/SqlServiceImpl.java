@@ -26,7 +26,6 @@ public class SqlServiceImpl implements SqlService {
         this.cart = transferMessage.getCart().getCart();
         this.uuid = UUID.randomUUID().toString();
     }
-
     @Override
     public void saveLog(Integer port) throws SQLException {
         String statement = "";
@@ -42,7 +41,6 @@ public class SqlServiceImpl implements SqlService {
         preparedStatement.setInt(7, transferMessage.getPort());
         preparedStatement.executeUpdate();
     }
-
     @Override
     public void updateLog(Integer port) throws SQLException {
         String statement = "";

@@ -23,79 +23,70 @@ public abstract class Server {
     }
     // Connect to the coordinator
     public Socket connect(){
-        try {
-            Socket socket = new Socket();
-            socket.bind(new InetSocketAddress(this.clientPort));
-            socket.connect(new InetSocketAddress("localhost",this.serverPort));
-            socket.setKeepAlive(true);
-            System.out.println("Server order has been connected with coordinator");
-            return socket;
-        }catch (IOException e) {
-            e.printStackTrace();
+        int reconnect_num = 0;
+        Socket socket = null;
+        while(socket==null){
+            try {
+                socket = new Socket();
+                socket.bind(new InetSocketAddress(this.clientPort));
+                socket.connect(new InetSocketAddress("localhost",this.serverPort));
+                socket.setKeepAlive(true);
+                System.out.println("The Server has been connected with coordinator");
+                return socket;
+            }catch (IOException e){
+//                e.printStackTrace();
+                ++reconnect_num;
+                socket=null;
+                System.out.println("Connecting to the coordinator for " + reconnect_num +" times");
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
-        return null;
+        return socket;
+
     }
     //
     public void serve(Socket socket){
-        int reconnect_num = 5;
-        while(socket==null && reconnect_num>0){
-            socket = this.connect();
-            reconnect_num--;
-        }
-        if(socket==null){
-            System.out.println("It can't connect to the coordinator after reconnecting for 5 times");
-            System.exit(-1);
-        }
-//        InputStream inputStream = null;
-//        InputStreamReader inputStreamReader = null;
-//        BufferedReader bufferedReader = null;
-        BufferedReader in = SocketUtil.createInputStream(socket);
         while(true) {
             try {
-//                inputStream = socket.getInputStream();
-//                inputStreamReader = new InputStreamReader(inputStream);
-//                bufferedReader = new BufferedReader(inputStreamReader);
-                String temp = null;
-                while ((temp = in.readLine())!=null) {
-                    TransferMessage transferMessage = null;
-                    try {
-                         transferMessage = SocketUtil.parseTransferMessage(temp);
-                    }catch (Exception e){
-                        System.out.println("Msg from coordinator can not be parsed as the object TransferMessage");
-                        continue;
+                    if(socket.isClosed()){
+                        socket = this.connect();
                     }
-                    if(sqlConnection==null){
-                        this.sqlConnection = DbUtils.getConnection(this.database);
-                        System.out.println("数据库连接重新建立");
+                    BufferedReader in = SocketUtil.createInputStream(socket);
+                    String temp = null;
+                    while ((temp = in.readLine())!=null) {
+                        TransferMessage transferMessage = null;
+                        try {
+                             transferMessage = SocketUtil.parseTransferMessage(temp);
+                        }catch (Exception e){
+                            System.out.println("Msg from coordinator can not be parsed as the object TransferMessage");
+                            continue;
+                        }
+                        if(sqlConnection==null){
+                            this.sqlConnection = DbUtils.getConnection(this.database);
+                        }
+                        if(transferMessage!=null){
+                            System.out.println("--------------------------------------------------------------------");
+                            System.out.println("This server received "+transferMessage);
+                            ServerWorker orderServerWorker = new ServerWorker(socket, sqlConnection,transferMessage);
+                            orderServerWorker.work();
+                        }else {
+                            System.out.println("The message server received can not be identified");
+                        }
                     }
-                    if(transferMessage!=null){
-                        System.out.println("--------------------------------------------------------------------");
-                        System.out.println("This server received "+transferMessage);
-                        ServerWorker orderServerWorker = new ServerWorker(socket, sqlConnection,transferMessage);
-                        orderServerWorker.work();
-                    }else {
-                        System.out.println("The message server received can not be identified");
-                    }
-                }
-
             } catch (IOException e1) {
-                e1.printStackTrace();
-                System.out.println("Error, closing the connection with coordinator, the server will be stopped!");
+//                e1.printStackTrace();
+                System.out.println("can't connect with coordinator, trying to reconnect");
                 try {
-                    if (in != null) {
-                        in.close();
-                    }
-                    if (!socket.isClosed()) {
+                    if(!socket.isClosed()){
                         socket.close();
                     }
 
-                } catch (Exception e2) {
-                    e2.printStackTrace();
+                } catch (IOException e) {
+//                    e.printStackTrace();
                 }
-                System.exit(-1);
-
             }catch (Exception e){
-                e.printStackTrace();
+                System.out.println("This server has some exceptions, which is that "+e.getMessage());
             }
         }
     }

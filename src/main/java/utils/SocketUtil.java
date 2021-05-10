@@ -52,16 +52,13 @@ public class SocketUtil {
             System.out.println("Error happened when send transfer message to servers");
         }
     }
-    public static BufferedReader createInputStream(Socket coConection){
-        try{
-            InputStream inputStream = coConection.getInputStream();
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream,StandardCharsets.UTF_8);
-            BufferedReader in = new BufferedReader(inputStreamReader);
-            return in;
-        } catch (Exception e) {
-            System.out.println("Error happened when create the inputstream");
-        }
-        return null;
+    public static BufferedReader createInputStream(Socket coConection) throws IOException {
+
+        InputStream inputStream = coConection.getInputStream();
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream,StandardCharsets.UTF_8);
+        BufferedReader in = new BufferedReader(inputStreamReader);
+        return in;
+
     }
 
     public static TransferMessage getResponse(BufferedReader in) throws IOException {
