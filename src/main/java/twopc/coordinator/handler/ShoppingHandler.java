@@ -51,6 +51,7 @@ public class ShoppingHandler extends AbstractHandler {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 System.out.println("Pre-commit Process Failed, Rollback to Previous");
                 CoordinatorServer.rollback(Stage.GLOBAL_ABORT, message);
+                System.out.println("-------------------------------------------------------------------");
                 return;
             }
             message = setTransferMessage(requestJson, Stage.GLOBAL_COMMIT, "Request Global Commit");
@@ -58,6 +59,7 @@ public class ShoppingHandler extends AbstractHandler {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 System.out.println("Do-commit Process Failed, Rollback to Previous");
                 CoordinatorServer.rollback(Stage.GLOBAL_ABORT, message);
+                System.out.println("-------------------------------------------------------------------");
                 return;
             }
 
@@ -99,27 +101,29 @@ public class ShoppingHandler extends AbstractHandler {
             // Wait for response
             for (Map.Entry<Integer, Socket> entry : CoordinatorServer.participants.entrySet()) {
                new Thread(() -> {
+                   // Concurrent control
+
                    try {
-                       // Concurrent control
-                       lock.lock();
                        // Receive responses
                        BufferedReader in = SocketUtil.createInputStream(entry.getValue());
                        if (entry.getValue() != null) {
                            TransferMessage msg = SocketUtil.getResponse(in);
+                           lock.lock();
                            if (msg != null) {
                                responses.add(msg);
                                System.out.println("This node received the message " + msg);
                            } else {
                                System.out.println("The message this node received can not be identified");
                            }
+                           lock.unlock();
                        }
-                       // Concurrent control
-                       lock.unlock();
                        cyclicBarrier.await();
                    } catch (InterruptedException | BrokenBarrierException | IOException e) {
                        e.printStackTrace();
                        System.out.println("Receive socket down");
                    }
+                   // Concurrent control
+
                }).start();
             }
             cyclicBarrier.await();
@@ -163,27 +167,31 @@ public class ShoppingHandler extends AbstractHandler {
             // Wait for response
             for (Map.Entry<Integer, Socket> entry : CoordinatorServer.participants.entrySet()) {
                 new Thread(() -> {
+                    // Concurrent control
+
                     try {
-                        // Concurrent control
-                        lock.lock();
+
                         // Receive response
                         BufferedReader in = SocketUtil.createInputStream(entry.getValue());
                         if (entry.getValue() != null) {
                             TransferMessage msg = SocketUtil.getResponse(in);
+                            lock.lock();
                             if (msg != null) {
                                 responses.add(msg);
                                 System.out.println("This node received the message " + msg);
                             } else {
                                 System.out.println("The message this node received can not be identified");
                             }
+                            lock.unlock();
                         }
-                        // Concurrent control
-                        lock.unlock();
+
                         cyclicBarrier.await();
                     } catch (InterruptedException | BrokenBarrierException | IOException e) {
                         e.printStackTrace();
                         System.out.println("Receive socket down");
                     }
+                    // Concurrent control
+
                 }).start();
             }
             cyclicBarrier.await();

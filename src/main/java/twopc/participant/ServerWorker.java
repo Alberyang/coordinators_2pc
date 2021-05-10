@@ -67,9 +67,9 @@ public class ServerWorker {
             System.out.println("Current stage is "+ transferMessage.getStage());
             System.out.println("Receiving message from coordinator "+ transferMessage.getMsg());
             try {
-                if(port==9002){
-                    throw new Exception("停掉");
-                }
+//                if(port==9001){
+//                    throw new Exception("shutdown the server");
+//                }
                 if(sqlConnection!=null){
                     this.sqlConnection.commit();
 //                    this.sqlConnection.close();
@@ -92,10 +92,10 @@ public class ServerWorker {
             // globle rollback阶段
             System.out.println("Current stage is "+ transferMessage.getStage());
             System.out.println("Receiving message from coordinator "+ transferMessage.getMsg());
-
+            System.out.println("lastStatus: "+lastStatus.toString());
             try {
                 this.sqlConnection.rollback();
-                if(lastStatus.getLastStage().getCode()==4){
+                if(lastStatus.getLastStage().getCode()==7){
                     if(port==9001){
                         sqlService.deleteOrder(lastStatus.getLastOrderId());
                     }
@@ -103,6 +103,7 @@ public class ServerWorker {
                         sqlService.restoreInventory(lastStatus.getLastSQLOperation());
                     }
                     sqlConnection.commit();
+                    System.out.println("Restore the data consistency");
                 }
 //                this.sqlConnection.close();
                 // 返回执行结果并返回给协调者
@@ -117,7 +118,10 @@ public class ServerWorker {
                 lastStatus.setLastStage(Stage.ABORT);
                 throwables.printStackTrace();
             }finally {
-                SocketUtil.responseTransferMsg(out,transferMessage);
+                if(transferMessage.getStage().getCode()!=0){
+                    SocketUtil.responseTransferMsg(out,transferMessage);
+                }
+
             }
 
         }
