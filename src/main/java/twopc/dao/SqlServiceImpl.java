@@ -14,7 +14,7 @@ public class SqlServiceImpl implements SqlService {
     private final String sql_order_log_update = "update orderLog set stage=? where id=?";
     private final String sql_inventory_log_update = "update inventoryLog set stage=? where id=?";
     private final String sql_order_insert = "insert into `order`(id,iPhone,iPad,iMac) values(?,?,?,?)";
-    private final String sql_inventory_update = "update inventory set inventoryNum=? where item=?";
+    private final String sql_inventory_update = "update inventory set inventoryNum=inventoryNum-? where item=? and inventoryNum>=?";
     private Connection sqlConnection;
     private TransferMessage transferMessage;
     private HashMap<String, Integer> cart = null;
@@ -66,20 +66,20 @@ public class SqlServiceImpl implements SqlService {
 
     @Override
     public void deleteInventory() throws SQLException {
-        Integer iPhoneNum = cart.get("iPhone");
         PreparedStatement ps = sqlConnection.prepareStatement(this.sql_inventory_update);
         ps.setInt(1, cart.get("iPhone"));
         ps.setString(2, "iPhone");
+        ps.setInt(3, cart.get("iPhone"));
         ps.addBatch();
-
         ps.setInt(1, cart.get("iPad"));
         ps.setString(2, "iPad");
+        ps.setInt(3, cart.get("iPad"));
         ps.addBatch();
-
         ps.setInt(1, cart.get("iMac"));
         ps.setString(2, "iMac");
+        ps.setInt(3, cart.get("iMac"));
         ps.addBatch();
-        ps.executeUpdate();
+        ps.executeBatch();
     }
 
     public String getSql_order_insert() {

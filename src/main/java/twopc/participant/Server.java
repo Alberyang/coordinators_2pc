@@ -68,7 +68,8 @@ public abstract class Server {
                         this.sqlConnection = DbUtils.getConnection(this.database);
                     }
                     if(transferMessage!=null){
-                        System.out.println("This server received the message "+transferMessage);
+                        System.out.println("--------------------------------------------------------------------");
+                        System.out.println("This server received "+transferMessage);
                         ServerWorker orderServerWorker = new ServerWorker(socket, sqlConnection,transferMessage);
                         orderServerWorker.work();
                     }else {

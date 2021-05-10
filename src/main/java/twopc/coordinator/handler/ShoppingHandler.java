@@ -112,6 +112,7 @@ public class ShoppingHandler extends AbstractHandler {
 
             cyclicBarrier.await(30000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
+            e.printStackTrace();
             System.out.println("System Pre-Commit Failed, Roll Back Operations");
             return false;
         }
