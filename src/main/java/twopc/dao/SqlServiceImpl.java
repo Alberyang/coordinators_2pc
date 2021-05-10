@@ -1,5 +1,6 @@
 package twopc.dao;
 
+import twopc.common.LastStatus;
 import twopc.common.TransferMessage;
 
 import java.sql.Connection;
@@ -15,6 +16,8 @@ public class SqlServiceImpl implements SqlService {
     private final String sql_inventory_log_update = "update inventoryLog set stage=? where id=?";
     private final String sql_order_insert = "insert into `order`(id,iPhone,iPad,iMac) values(?,?,?,?)";
     private final String sql_inventory_update = "update inventory set inventoryNum=inventoryNum-? where item=? and inventoryNum>=?";
+    private final String sql_order_delete = "delete from `order` where id = ?";
+    private final String sql_inventory_restore = "update inventory set inventoryNum = inventoryNum + ? where item = ?";
     private Connection sqlConnection;
     private TransferMessage transferMessage;
     private HashMap<String, Integer> cart = null;
@@ -53,13 +56,36 @@ public class SqlServiceImpl implements SqlService {
     }
 
     @Override
-    public void placeOrder() throws SQLException {
+    public void deleteOrder(String id) throws SQLException {
+        PreparedStatement preparedStatement = sqlConnection.prepareStatement(this.sql_order_delete);
+        preparedStatement.setString(1, id);
+        preparedStatement.executeUpdate();
+    }
+
+    @Override
+    public void restoreInventory(HashMap<String, Integer> cart) throws SQLException {
+        PreparedStatement ps = sqlConnection.prepareStatement(this.sql_inventory_restore);
+        ps.setInt(1,cart.get("iPhone"));
+        ps.setString(2,"iPhone");
+        ps.addBatch();
+        ps.setInt(1, cart.get("iPad"));
+        ps.setString(2, "iPad");
+        ps.addBatch();
+        ps.setInt(1, cart.get("iMac"));
+        ps.setString(2, "iMac");
+        ps.addBatch();
+        ps.executeBatch();
+    }
+
+    @Override
+    public void placeOrder(LastStatus lastStatus) throws SQLException {
         PreparedStatement preparedStatement = sqlConnection.prepareStatement(this.sql_order_insert);
         preparedStatement.setString(1, uuid);
         preparedStatement.setInt(2, cart.get("iPhone"));
         preparedStatement.setInt(3, cart.get("iPad"));
         preparedStatement.setInt(4, cart.get("iMac"));
         preparedStatement.executeUpdate();
+        lastStatus.setLastOrderId(uuid);
     }
 
     @Override

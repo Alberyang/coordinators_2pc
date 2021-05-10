@@ -2,6 +2,7 @@ package twopc.participant;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import twopc.common.LastStatus;
 import utils.SocketUtil;
 import twopc.common.Stage;
 import twopc.common.TransferMessage;
@@ -17,11 +18,13 @@ public class ServerWorker {
     private TransferMessage transferMessage;
     private Socket coConnection;
     private Connection sqlConnection;
+    private LastStatus lastStatus;
 
-    public ServerWorker(Socket coConection, Connection sqlConnection,TransferMessage transferMessage){
+    public ServerWorker(Socket coConection, Connection sqlConnection,TransferMessage transferMessage,LastStatus lastStatus){
         this.sqlConnection = sqlConnection;
         this.coConnection = coConection;
         this.transferMessage = transferMessage;
+        this.lastStatus = lastStatus;
     }
     public void work(){
         Integer port = transferMessage.getPort();
@@ -36,7 +39,7 @@ public class ServerWorker {
             try{
 //                sqlService.saveLog(transferMessage.getPort());
                 if(port==9001){
-                    sqlService.placeOrder();
+                    sqlService.placeOrder(lastStatus);
                 }
                 if(port==9002){
                     int[] results = sqlService.deleteInventory();
@@ -45,12 +48,15 @@ public class ServerWorker {
                             throw new SQLException("Inventory is not enough");
                         }
                     }
+                    lastStatus.setLastSQLOperation(transferMessage.getCart().getCart());
                 }
                 transferMessage.setStage(Stage.VOTE_COMMIT);
                 transferMessage.setMsg("This server votes commit to coordinator");
+                lastStatus.setLastStage(Stage.VOTE_COMMIT);
             }catch (Exception e){
                 transferMessage.setMsg("Local Transaction execution fails, the reason is that "+ e.getMessage());
                 transferMessage.setStage(Stage.VOTE_ABORT);
+                lastStatus.setLastStage(Stage.VOTE_ABORT);
 
             }finally {
                 SocketUtil.responseTransferMsg(out,transferMessage);
@@ -69,11 +75,13 @@ public class ServerWorker {
 //                    this.sqlConnection.close();
                     transferMessage.setMsg("This database commit successully");
                     transferMessage.setStage(Stage.COMMIT_SUCCESS);
+                    lastStatus.setLastStage(Stage.COMMIT_SUCCESS);
                 }
             }catch (Exception e){
                 e.printStackTrace();
                 transferMessage.setMsg("Database commit fails");
                 transferMessage.setStage(Stage.ABORT);
+                lastStatus.setLastStage(Stage.ABORT);
             }
             finally {
                 SocketUtil.responseTransferMsg(out,transferMessage);
@@ -84,18 +92,29 @@ public class ServerWorker {
             // globle rollback阶段
             System.out.println("Current stage is "+ transferMessage.getStage());
             System.out.println("Receiving message from coordinator "+ transferMessage.getMsg());
-            try {
 
+            try {
                 this.sqlConnection.rollback();
+                if(lastStatus.getLastStage().getCode()==4){
+                    if(port==9001){
+                        sqlService.deleteOrder(lastStatus.getLastOrderId());
+                    }
+                    if(port==9002){
+                        sqlService.restoreInventory(lastStatus.getLastSQLOperation());
+                    }
+                    sqlConnection.commit();
+                }
 //                this.sqlConnection.close();
                 // 返回执行结果并返回给协调者
                 transferMessage.setMsg("This database rollback successfully");
                 // 回复进入初始化阶段 等待重新整个服务
                 transferMessage.setStage(Stage.INIT);
+                lastStatus.setLastStage(Stage.INIT);
 
             } catch (SQLException throwables) {
                 transferMessage.setMsg("This database rollback fails");
                 transferMessage.setStage(Stage.ABORT);
+                lastStatus.setLastStage(Stage.ABORT);
                 throwables.printStackTrace();
             }finally {
                 SocketUtil.responseTransferMsg(out,transferMessage);

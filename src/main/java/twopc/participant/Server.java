@@ -1,4 +1,5 @@
 package twopc.participant;
+import twopc.common.LastStatus;
 import twopc.common.TransferMessage;
 import utils.SocketUtil;
 import utils.DbUtils;
@@ -15,11 +16,13 @@ public abstract class Server {
     private final Integer serverPort;
     private final Integer clientPort;
     private final String database;
+    private LastStatus lastStatus = null;
     public Server(Integer serverPort,Integer clientPort, String database) {
         this.database = database;
         this.serverPort = serverPort;
         this.clientPort = clientPort;
         this.sqlConnection = DbUtils.getConnection(this.database);
+        this.lastStatus = new LastStatus();
     }
     // Connect to the coordinator
     public Socket connect(){
@@ -68,7 +71,7 @@ public abstract class Server {
                         if(transferMessage!=null){
                             System.out.println("--------------------------------------------------------------------");
                             System.out.println("This server received "+transferMessage);
-                            ServerWorker orderServerWorker = new ServerWorker(socket, sqlConnection,transferMessage);
+                            ServerWorker orderServerWorker = new ServerWorker(socket, sqlConnection,transferMessage,lastStatus);
                             orderServerWorker.work();
                         }else {
                             System.out.println("The message server received can not be identified");
