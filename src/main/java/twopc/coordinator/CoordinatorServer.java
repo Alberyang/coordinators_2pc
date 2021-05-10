@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 public class CoordinatorServer {
     public static HashMap<Integer, Socket> participants = new HashMap<Integer, Socket>();
-    private static final Logger log = Logger.getLogger(Coordinator.class.getName());
+    private static final Logger log = Logger.getLogger(CoordinatorServer.class.getName());
     private static final int port = 9000;
 
     /**

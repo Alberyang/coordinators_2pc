@@ -47,6 +47,7 @@ public class ShoppingHandler extends AbstractHandler {
             }
             JSONObject requestJson = JSONObject.parseObject(jsonString.toString());
 
+            System.out.println("\n------------------------Transaction Start------------------------");
             message = setTransferMessage(requestJson, Stage.VOTE_REQUEST, "Request Pre-Commit Voting");
             if (!preCommit(message)){
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -65,6 +66,7 @@ public class ShoppingHandler extends AbstractHandler {
 
             response.setStatus(HttpServletResponse.SC_OK);
             System.out.println("Transaction Process Completed.");
+            System.out.println("-------------------------------------------------------------------");
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             System.out.println("Unknown type of operation");
