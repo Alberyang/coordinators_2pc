@@ -39,13 +39,19 @@ public class ServerWorker {
                     sqlService.placeOrder();
                 }
                 if(port==9002){
-                    sqlService.deleteInventory();
+                    int[] results = sqlService.deleteInventory();
+                    for(int i:results){
+                        if(i==0){
+                            throw new SQLException("Inventory is not enough");
+                        }
+                    }
                 }
                 transferMessage.setStage(Stage.VOTE_COMMIT);
                 transferMessage.setMsg("This server votes commit to coordinator");
             }catch (Exception e){
-                transferMessage.setMsg("Local Transaction execution fails");
+                transferMessage.setMsg("Local Transaction execution fails, the reason is that "+ e.getMessage());
                 transferMessage.setStage(Stage.VOTE_ABORT);
+
             }finally {
                 SocketUtil.responseTransferMsg(out,transferMessage);
             }
@@ -55,9 +61,12 @@ public class ServerWorker {
             System.out.println("Current stage is "+ transferMessage.getStage());
             System.out.println("Receiving message from coordinator "+ transferMessage.getMsg());
             try {
+                if(port==9002){
+                    throw new Exception("停掉");
+                }
                 if(sqlConnection!=null){
                     this.sqlConnection.commit();
-                    this.sqlConnection.close();
+//                    this.sqlConnection.close();
                     transferMessage.setMsg("This database commit successully");
                     transferMessage.setStage(Stage.COMMIT_SUCCESS);
                 }
@@ -71,16 +80,14 @@ public class ServerWorker {
                 System.out.println("The execution of this transaction of shopping is completed");
             }
 
-
         }else if(transferMessage.getStage().getCode() == 5){
             // globle rollback阶段
             System.out.println("Current stage is "+ transferMessage.getStage());
             System.out.println("Receiving message from coordinator "+ transferMessage.getMsg());
             try {
-                //数据库回滚
+
                 this.sqlConnection.rollback();
-                //记录日志
-                this.sqlConnection.close();
+//                this.sqlConnection.close();
                 // 返回执行结果并返回给协调者
                 transferMessage.setMsg("This database rollback successfully");
                 // 回复进入初始化阶段 等待重新整个服务
@@ -89,6 +96,7 @@ public class ServerWorker {
             } catch (SQLException throwables) {
                 transferMessage.setMsg("This database rollback fails");
                 transferMessage.setStage(Stage.ABORT);
+                throwables.printStackTrace();
             }finally {
                 SocketUtil.responseTransferMsg(out,transferMessage);
             }

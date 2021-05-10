@@ -65,7 +65,7 @@ public class SqlServiceImpl implements SqlService {
     }
 
     @Override
-    public void deleteInventory() throws SQLException {
+    public int[] deleteInventory() throws SQLException {
         PreparedStatement ps = sqlConnection.prepareStatement(this.sql_inventory_update);
         ps.setInt(1, cart.get("iPhone"));
         ps.setString(2, "iPhone");
@@ -79,7 +79,9 @@ public class SqlServiceImpl implements SqlService {
         ps.setString(2, "iMac");
         ps.setInt(3, cart.get("iMac"));
         ps.addBatch();
-        ps.executeBatch();
+        return ps.executeBatch();
+
+
     }
 
     public String getSql_order_insert() {

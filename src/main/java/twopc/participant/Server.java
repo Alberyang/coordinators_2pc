@@ -66,6 +66,7 @@ public abstract class Server {
                     }
                     if(sqlConnection==null){
                         this.sqlConnection = DbUtils.getConnection(this.database);
+                        System.out.println("数据库连接重新建立");
                     }
                     if(transferMessage!=null){
                         System.out.println("--------------------------------------------------------------------");

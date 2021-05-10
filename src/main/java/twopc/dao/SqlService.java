@@ -6,5 +6,5 @@ public interface SqlService {
     void saveLog(Integer port) throws SQLException;
     void updateLog(Integer port)throws SQLException;
     void placeOrder()throws SQLException;
-    void deleteInventory()throws SQLException;
+    int[] deleteInventory()throws SQLException;
 }

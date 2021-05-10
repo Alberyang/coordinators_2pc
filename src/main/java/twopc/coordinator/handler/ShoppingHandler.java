@@ -56,7 +56,6 @@ public class ShoppingHandler extends AbstractHandler {
                 CoordinatorServer.rollback(Stage.GLOBAL_ABORT, message);
                 return;
             }
-
             message = setTransferMessage(requestJson, Stage.GLOBAL_COMMIT, "Request Global Commit");
             if (!doCommit(message)){
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -78,7 +77,7 @@ public class ShoppingHandler extends AbstractHandler {
      * Pre-Commit Phase
      */
     private boolean preCommit(TransferMessage message) {
-        CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
+        CyclicBarrier cyclicBarrier = new CyclicBarrier(3);
         List<TransferMessage> responses = new ArrayList<>();
         try{
             // Send Request
@@ -149,7 +148,7 @@ public class ShoppingHandler extends AbstractHandler {
      * Do-Commit Phase
      */
     private boolean doCommit(TransferMessage message) {
-        CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
+        CyclicBarrier cyclicBarrier = new CyclicBarrier(3);
         List<TransferMessage> responses = new ArrayList<>();
         try{
             // Send Request

@@ -50,7 +50,7 @@ public class SocketUtil {
             out.flush();
             System.out.println("Message" + JSONObject.toJSONString(transferMessage) + "has been successfully sent to servers");
         }catch (Exception e){
-            e.printStackTrace();
+            System.out.println("Server has disconnected");
             System.out.println("Error happened when send transfer message to servers");
         }
     }
