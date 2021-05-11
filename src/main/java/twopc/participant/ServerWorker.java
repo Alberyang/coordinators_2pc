@@ -26,6 +26,10 @@ public class ServerWorker {
         this.transferMessage = transferMessage;
         this.lastStatus = lastStatus;
     }
+    /**
+     * Handle the task at each stage, and connect with a database to execute the local transaction
+     * Receive and response the TransferMessage obejct with coordinator to work the 2pc algorithm
+     */
     public void work(){
         Integer port = transferMessage.getPort();
         BufferedWriter out = SocketUtil.createOutputStream(this.coConnection);

@@ -24,7 +24,9 @@ public abstract class Server {
         this.sqlConnection = DbUtils.getConnection(this.database);
         this.lastStatus = new LastStatus();
     }
-    // Connect to the coordinator
+    /**
+     * Create the socket connection to the coordinator
+     */
     public Socket connect(){
         int reconnect_num = 0;
         Socket socket = null;
@@ -48,7 +50,10 @@ public abstract class Server {
         return socket;
 
     }
-    //
+    /**
+     * Start the 2pc service to receive and respond the message
+     * @param socket - assign the socket that has been connected
+     */
     public void serve(Socket socket){
         while(true) {
             try {

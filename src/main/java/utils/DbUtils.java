@@ -9,7 +9,10 @@ import java.util.Properties;
 
 public class DbUtils {
 
-
+    /**
+     * Create the database connection
+     * @param db_name - Assign the database name
+     */
     public static Connection getConnection(String db_name) {
         Connection conn = null;
         try {
@@ -32,7 +35,10 @@ public class DbUtils {
 
         return conn;
     }
-
+    /**
+     * Close the database connection
+     * @param conn - Assign the database connection that need to be closed
+     */
     public static void closeConnection(Connection conn) {
         try {
             conn.close();

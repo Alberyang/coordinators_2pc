@@ -29,6 +29,10 @@ public class SqlServiceImpl implements SqlService {
         this.cart = transferMessage.getCart().getCart();
         this.uuid = UUID.randomUUID().toString();
     }
+    /**
+     * Insert the operation log to the database
+     * @param port - identify the server by port
+     */
     @Override
     public void saveLog(Integer port) throws SQLException {
         String statement = "";
@@ -44,6 +48,10 @@ public class SqlServiceImpl implements SqlService {
         preparedStatement.setInt(7, transferMessage.getPort());
         preparedStatement.executeUpdate();
     }
+    /**
+     * Update the operation log to the database
+     * @param port - identify the server by port
+     */
     @Override
     public void updateLog(Integer port) throws SQLException {
         String statement = "";
@@ -54,7 +62,10 @@ public class SqlServiceImpl implements SqlService {
         preparedStatement.setString(2, transferMessage.getId());
         preparedStatement.executeUpdate();
     }
-
+    /**
+     * Delete order by assigning the id
+     * @param id - order id need to be assigned
+     */
     @Override
     public void deleteOrder(String id) throws SQLException {
         PreparedStatement preparedStatement = sqlConnection.prepareStatement(this.sql_order_delete);
@@ -62,6 +73,10 @@ public class SqlServiceImpl implements SqlService {
         preparedStatement.executeUpdate();
     }
 
+    /**
+     * Restore the inventory data to make sure the data consistency
+     * @param cart - The cart of last status
+     */
     @Override
     public void restoreInventory(HashMap<String, Integer> cart) throws SQLException {
         PreparedStatement ps = sqlConnection.prepareStatement(this.sql_inventory_restore);
@@ -77,6 +92,10 @@ public class SqlServiceImpl implements SqlService {
         ps.executeBatch();
     }
 
+    /**
+     * Insert the order item to the database
+     * @param lastStatus - update the laststatus
+     */
     @Override
     public void placeOrder(LastStatus lastStatus) throws SQLException {
         PreparedStatement preparedStatement = sqlConnection.prepareStatement(this.sql_order_insert);
@@ -88,6 +107,9 @@ public class SqlServiceImpl implements SqlService {
         lastStatus.setLastOrderId(uuid);
     }
 
+    /**
+     * Decrease the inventory number corresponding to the item
+     */
     @Override
     public int[] deleteInventory() throws SQLException {
         PreparedStatement ps = sqlConnection.prepareStatement(this.sql_inventory_update);
