@@ -46,10 +46,26 @@ Import the maven dependency:
 ## System Architecture
 ### E-commerce Distributed Transaction Application
 ![demo-pic1](https://github.com/Alberyang/coordinators_2pc/blob/master/architecute_pic/demo-pic1.png)
+The algorithm will be used in a distributed e-commerce application.
+There are two services Order Service and Inventory Service and the corresponding database.
+The server will call the inventory and order services after accepting the user request.
+
 ### 2pc(commit) Architecture
 ![2pc-arthitecture-commit](https://github.com/Alberyang/coordinators_2pc/blob/master/architecute_pic/2PC%20applied%20to%20the%20project(normal).png)
+Two-phase commit algorithm can guarantee the data consistency between 
+different nodes in the distributed system to some extent.
+A request is in multiple microservice call chains, and data processing for all 
+services is either all successful or all rolled back.
+
+
+
 ### 2pc(rollback) Architecture
 ![2pc-arthitecture-rollback](https://github.com/Alberyang/coordinators_2pc/blob/master/architecute_pic/2PC%20applied%20to%20the%20project(abort).png)
+When certain of service fails to ready to commit, it will vote abort to coordinator,
+and then the coordinator will send the rollback instruction to all of services in this
+distributed system. All of services receiving this message will rollback local trans-
+actions respectively to make sure the data consistency of the whole system.
+
 ## Code Structure
 
 ## Maintainers
