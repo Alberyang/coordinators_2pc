@@ -146,7 +146,7 @@ actions respectively to make sure the data consistency of the whole system.
 
 | Name         | Email                           |
 | ------------ | ------------------------------- |
-| wenhai huo   |                                 |
-| zeying zhang |                                 |
-| haowen shen  |                                 |
+| wenhai huo   | haoshen@student.unimelb.edu.au                                |
+| zeying zhang | zeying@student.unimelb.edu.au                                |
+| haowen shen  |  wenhaih@student.unimelb.edu.au                               |
 | yuyang wang  | yuyawang@student.unimelb.edu.au |
