@@ -141,6 +141,7 @@ distributed system. All of services receiving this message will rollback local t
 actions respectively to make sure the data consistency of the whole system.
 
 ## Code Structure
+```
 +---java
 |   +---twopc
 |   |   +---common
@@ -173,6 +174,7 @@ actions respectively to make sure the data consistency of the whole system.
 |           
 \---resources
         jdbc.properties
+```
 ## Maintainers
 
 | Name         | Email                           |
