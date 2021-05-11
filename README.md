@@ -26,6 +26,16 @@ MySQL is an open-source relational database management system. Its name is a com
 
 Install MySQL through this link (https://www.mysql.com/downloads/)
 
+Import the maven dependency:
+
+```
+<dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.23</version>
+</dependency>
+```
+
 **Eclipse Jetty**
 
 Eclipse Jetty is a Java web server and Java Servlet container. While web servers are usually associated with serving documents to people, Jetty is now often used for machine to machine communications, usually within larger software frameworks.
