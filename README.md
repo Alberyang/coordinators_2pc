@@ -141,7 +141,38 @@ distributed system. All of services receiving this message will rollback local t
 actions respectively to make sure the data consistency of the whole system.
 
 ## Code Structure
-
++---java
+|   +---twopc
+|   |   +---common
+|   |   |       LastStatus.java
+|   |   |       ShoppingCart.java
+|   |   |       Stage.java
+|   |   |       TransferMessage.java
+|   |   |       
+|   |   +---coordinator
+|   |   |   |   Coordinator.java
+|   |   |   |   CoordinatorServer.java
+|   |   |   |   IOThread.java
+|   |   |   |   
+|   |   |   \---handler
+|   |   |           ShoppingHandler.java
+|   |   |           
+|   |   +---dao
+|   |   |       SqlService.java
+|   |   |       SqlServiceImpl.java
+|   |   |       
+|   |   \---participant
+|   |           InventoryServer.java
+|   |           OrderServer.java
+|   |           Server.java
+|   |           ServerWorker.java
+|   |           
+|   \---utils
+|           DbUtils.java
+|           SocketUtil.java
+|           
+\---resources
+        jdbc.properties
 ## Maintainers
 
 | Name         | Email                           |
