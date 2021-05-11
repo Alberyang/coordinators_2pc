@@ -41,7 +41,12 @@ Import the maven dependency:
 ```
 
 ## Usage
-
+1. Modify database configuration information.
+2. Start the Coordinator server.
+3. Start the Order server. The default port of this server is 9001.
+4. Start the Inventory server. The default port of this server is 9002.
+5. Request the URL "http://localhost:8001/shopping" to use 2pc algorithm to handle the shopping transaction.
+6. Request the URL "http://localhost:8001/no_2pc" to handle the shopping transaction without 2pc algorithm.
 
 ## System Architecture
 ### E-commerce Distributed Transaction Application
