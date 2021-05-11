@@ -44,7 +44,8 @@ public abstract class Server {
                 socket=null;
                 System.out.println("Connecting to the coordinator for " + reconnect_num +" times");
             }catch (Exception e){
-                e.printStackTrace();
+//                e.printStackTrace();
+                System.out.println("Connecting Error, please reconnect to the coordinator");
             }
         }
         return socket;

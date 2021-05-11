@@ -30,7 +30,7 @@ public class DbUtils {
             conn = DriverManager.getConnection(url, user, password);
             conn.setAutoCommit(false);
         } catch (ClassNotFoundException | SQLException | IOException e) {
-            e.printStackTrace();
+            System.out.println("Error happens while getting the database connection");
         }
 
         return conn;
@@ -43,7 +43,7 @@ public class DbUtils {
         try {
             conn.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Error happens while closing the database connection");
         }
     }
 }

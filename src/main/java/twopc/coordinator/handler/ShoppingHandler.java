@@ -119,14 +119,14 @@ public class ShoppingHandler extends AbstractHandler {
                        }
                        cyclicBarrier.await();
                    } catch (InterruptedException | BrokenBarrierException | IOException e) {
-                       e.printStackTrace();
+//                       e.printStackTrace();
                        System.out.println("Receive socket down");
                    }
                }).start();
             }
             cyclicBarrier.await();
         } catch (InterruptedException | BrokenBarrierException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             System.out.println("System Pre-Commit Failed, Roll Back Operations");
             return false;
         }
@@ -183,14 +183,14 @@ public class ShoppingHandler extends AbstractHandler {
                         }
                         cyclicBarrier.await();
                     } catch (InterruptedException | BrokenBarrierException | IOException e) {
-                        e.printStackTrace();
+//                        e.printStackTrace();
                         System.out.println("Receive socket down");
                     }
                 }).start();
             }
             cyclicBarrier.await();
         } catch (InterruptedException | BrokenBarrierException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             System.out.println("System Do-Commit Failed, Roll Back Operations");
             return false;
         }

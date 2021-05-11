@@ -82,7 +82,7 @@ public class ServerWorker {
                     lastStatus.setLastStage(Stage.COMMIT_SUCCESS);
                 }
             }catch (Exception e){
-                e.printStackTrace();
+//                e.printStackTrace();
                 transferMessage.setMsg("Database commit fails");
                 transferMessage.setStage(Stage.ABORT);
                 lastStatus.setLastStage(Stage.ABORT);
@@ -120,7 +120,7 @@ public class ServerWorker {
                 transferMessage.setMsg("This database rollback fails");
                 transferMessage.setStage(Stage.ABORT);
                 lastStatus.setLastStage(Stage.ABORT);
-                throwables.printStackTrace();
+//                throwables.printStackTrace();
             }finally {
                 if(transferMessage.getStage().getCode()!=0){
                     SocketUtil.responseTransferMsg(out,transferMessage);
