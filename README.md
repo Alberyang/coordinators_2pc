@@ -44,11 +44,11 @@ Import the maven dependency:
 
 
 ## System Architecture
-###E-commerce Distributed Transaction Application
+### E-commerce Distributed Transaction Application
 ![demo-pic1](https://github.com/Alberyang/coordinators_2pc/blob/master/architecute_pic/demo-pic1.png)
-###2pc(commit) Architecture
+### 2pc(commit) Architecture
 ![2pc-arthitecture-commit](https://github.com/Alberyang/coordinators_2pc/blob/master/architecute_pic/2PC%20applied%20to%20the%20project(normal).png)
-###2pc(rollback) Architecture
+### 2pc(rollback) Architecture
 ![2pc-arthitecture-rollback](https://github.com/Alberyang/coordinators_2pc/blob/master/architecute_pic/2PC%20applied%20to%20the%20project(abort).png)
 ## Code Structure
 
