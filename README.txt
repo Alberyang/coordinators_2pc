@@ -185,31 +185,11 @@ actions respectively to make sure the data consistency of the whole system.
 \---resources
         jdbc.properties
 ```
-### twopc.common Structure
-
-
-
-### twopc.coordinator Structure
-
-
-
-### twopc.dao Structure
-
-
-
-### twopc.particitpant Structure
-
-
-### twopc.utils Structure
-DbUtils.java and SocketUtil.java are including in twopc.utils package. In this package, reading data from input stream 
-as well as write data to an output stream 
-
-
 ## Maintainers
 
 | Name         | Email                           |
 | ------------ | ------------------------------- |
-| wenhai huo   | wenhaih@student.unimelb.edu.au  |
-| zeying zhang | zeying@student.unimelb.edu.au   |
-| haowen shen  | haoshen@student.unimelb.edu.au  |
+| wenhai huo   | wenhaih@student.unimelb.edu.au  |                            |
+| zeying zhang | zeying@student.unimelb.edu.au   |                            |
+| haowen shen  | haoshen@student.unimelb.edu.au  |                             |
 | yuyang wang  | yuyawang@student.unimelb.edu.au |
