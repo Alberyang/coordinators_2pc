@@ -41,12 +41,81 @@ Import the maven dependency:
 ```
 
 ## Usage
+1. Create database and tables using the following script.
+```
+DROP DATABASE IF EXISTS `2pc_inventory`;
+CREATE DATABASE IF NOT EXISTS `2pc_inventory` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `2pc_inventory`;
+
+CREATE TABLE `inventory` (
+  `item` varchar(32) NOT NULL,
+  `inventoryNum` int NOT NULL,
+  PRIMARY KEY (`item`),
+  UNIQUE KEY `id_UNIQUE` (`item`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `inventoryLog` (
+  `id` varchar(32) NOT NULL,
+  `stage` varchar(45) DEFAULT NULL,
+  `_from` varchar(128) DEFAULT NULL,
+  `_to` varchar(128) DEFAULT NULL,
+  `content` varchar(128) DEFAULT NULL,
+  `msg` varchar(128) DEFAULT NULL,
+  `port` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+DROP DATABASE IF EXISTS `2pc_order`;
+CREATE DATABASE `2pc_order` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `2pc_order`;
+
+CREATE TABLE `order` (
+  `id` varchar(32) NOT NULL,
+  `iPhone` int NOT NULL,
+  `iPad` int NOT NULL,
+  `iMac` int NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `orderLog` (
+  `id` varchar(32) NOT NULL,
+  `stage` varchar(45) DEFAULT NULL,
+  `_from` varchar(128) DEFAULT NULL,
+  `_to` varchar(128) DEFAULT NULL,
+  `content` varchar(128) DEFAULT NULL,
+  `msg` varchar(128) DEFAULT NULL,
+  `port` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+```
 1. Modify database configuration information.
-2. Start the Coordinator server.
+```
+order=jdbc:mysql://localhost:3306/2pc_order
+inventory=jdbc:mysql://localhost:3306/2pc_inventory
+user=<your username>
+password=<your password>
+driver=com.mysql.cj.jdbc.Driver
+```
+2. Start the Coordinator server. The default HTTP port of this server is 8001 and the default socket port is 9000.
+```
+javac Coordinator.java
+java Coordinator
+```
 3. Start the Order server. The default port of this server is 9001.
+```
+javac OrderServer.java
+java OrderServer
+```
 4. Start the Inventory server. The default port of this server is 9002.
+```
+javac InventoryServer.java
+java InventoryServer
+```
 5. Request the URL "http://localhost:8001/shopping" to use 2pc algorithm to handle the shopping transaction.
-6. Request the URL "http://localhost:8001/no_2pc" to handle the shopping transaction without 2pc algorithm.
+6. Request the URL "http://localhost:8001/no_2pc" to simply handle the shopping transaction without 2pc algorithm.
 
 ## System Architecture
 ### E-commerce Distributed Transaction Application
