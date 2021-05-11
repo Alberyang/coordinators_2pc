@@ -202,6 +202,8 @@ InventoryServer.java and OrderServer.java are the starter classes for the Invent
 ### twopc.utils Structure
 The DbUtils.java and SocketUtil.java utility classes are included in the twopc.utils package. SocketUtil.java provides the ability to read data from the input stream and write data to the output stream. dbUtils.java provides the ability to connect to a database.
 
+### twopc.resources Structure
+jdbc.properties stores the configuration of the database connection.
 
 ## Maintainers
 
