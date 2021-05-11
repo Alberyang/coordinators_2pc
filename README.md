@@ -186,7 +186,7 @@ actions respectively to make sure the data consistency of the whole system.
         jdbc.properties
 ```
 ### twopc.common Structure
-
+Common entity classes are placed in this folder, where the Stage.java class represents the stages of the 2pc algorithm, the Shoppingcart.java class stores the products purchased by the user, the TransferMessage.java class represents the data transferred between the server and the coordinator, and the LastStatus.java class is used to store the previous status.
 
 
 ### twopc.coordinator Structure
@@ -203,24 +203,21 @@ a participant. All connected sockets would be recorded in the Coordinator server
 implementation via socket message transfer.
 
 CoordinatorServer is the main java class of the coordinator. Both http service handler and 2pc sockets are taken over by
-coordinator server. Additionally, 2pc commit requests and 2pc rollback request are 
+coordinator server. Additionally, 2pc commit requests and 2pc rollback request are also under this class.
 
+Cooridinator class is the main entry for creating a coordinator in a distributed transaction system.
 
 ### twopc.dao Structure
+SqlService.java & SqlServiceImpl.java are the interface and implementation classes of the SQL service, respectively, and they provide many SQL operations, such as deleting inventory and adding orders and updating logs in the database.
 
-
-
-### twopc.participant Structure
-
+### twopc.particitpant Structure
+InventoryServer.java and OrderServer.java are the starter classes for the Inventory service and the Order service, respectively. Server.java is the parent of these two classes, and they provide the socket connection to the coordinator and perform the 2pc algorithm process by calling ServerWorker.java.
 
 ### twopc.utils Structure
-DbUtils.java and SocketUtil.java are including in twopc.utils package. 
+The DbUtils.java and SocketUtil.java utility classes are included in the twopc.utils package. SocketUtil.java provides the ability to read data from the input stream and write data to the output stream. dbUtils.java provides the ability to connect to a database.
 
-In this package, static methods of reading data 
-from input stream as well as writing data to socket output stream are implemented in SocketUtil.java file. These two 
-methods allow coordinator and participants communicate with each other through a socket connection.
-
-DbUtils.java is a utiliy that involves MySQL connection and disconnection methods. 
+### twopc.resources Structure
+jdbc.properties stores the configuration of the database connection.
 
 ## Maintainers
 

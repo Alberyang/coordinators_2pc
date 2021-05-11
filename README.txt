@@ -101,7 +101,7 @@ CREATE TABLE `orderLog` (
   UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 ```
-1. Modify database configuration information.
+1. Modify database configuration information in /resources/jdbc.properties.
 ```
 order=jdbc:mysql://localhost:3306/2pc_order
 inventory=jdbc:mysql://localhost:3306/2pc_inventory
@@ -136,9 +136,9 @@ The server will call the inventory and order services after accepting the user r
 
 ### 2pc(commit) Architecture
 ![2pc-arthitecture-commit](https://github.com/Alberyang/coordinators_2pc/blob/master/architecute_pic/2PC%20applied%20to%20the%20project(normal).png)
-Two-phase commit algorithm can guarantee the data consistency between 
+Two-phase commit algorithm can guarantee the data consistency between
 different nodes in the distributed system to some extent.
-A request is in multiple microservice call chains, and data processing for all 
+A request is in multiple microservice call chains, and data processing for all
 services is either all successful or all rolled back.
 
 
@@ -159,37 +159,71 @@ actions respectively to make sure the data consistency of the whole system.
 |   |   |       ShoppingCart.java
 |   |   |       Stage.java
 |   |   |       TransferMessage.java
-|   |   |       
+|   |   |
 |   |   +---coordinator
 |   |   |   |   Coordinator.java
 |   |   |   |   CoordinatorServer.java
 |   |   |   |   IOThread.java
-|   |   |   |   
+|   |   |   |
 |   |   |   \---handler
 |   |   |           ShoppingHandler.java
-|   |   |           
+|   |   |
 |   |   +---dao
 |   |   |       SqlService.java
 |   |   |       SqlServiceImpl.java
-|   |   |       
+|   |   |
 |   |   \---participant
 |   |           InventoryServer.java
 |   |           OrderServer.java
 |   |           Server.java
 |   |           ServerWorker.java
-|   |           
+|   |
 |   \---utils
 |           DbUtils.java
 |           SocketUtil.java
-|           
+|
 \---resources
         jdbc.properties
 ```
+### twopc.common Structure
+Common entity classes are placed in this folder, where the Stage.java class represents the stages of the 2pc algorithm, the Shoppingcart.java class stores the products purchased by the user, the TransferMessage.java class represents the data transferred between the server and the coordinator, and the LastStatus.java class is used to store the previous status.
+
+
+### twopc.coordinator Structure
+Coordinator package are consisted of a coordinator server and http shopping handler. IOThread is one of the componences
+of coordinator server which is designed to handle both http service and socket communications with other participants.
+
+ShoppingHandler contains the http service logic for user to buy a number of items. It is implemented with java jetty
+framework handling http request, and active the distributed transaction commit algorithm. A 2pc algorithm would be invoked
+by accessing localhost:8001/shopping, while a simple showcase which didn't implement our algorithm would be preformed via
+localhost:8001/no_2pc.
+
+IOThread is a java class handling socket I/O with a new thread, which allows the coodinator to be accessed at anytime by
+a participant. All connected sockets would be recorded in the Coordinator server with the aim of furture 2pc algorithm
+implementation via socket message transfer.
+
+CoordinatorServer is the main java class of the coordinator. Both http service handler and 2pc sockets are taken over by
+coordinator server. Additionally, 2pc commit requests and 2pc rollback request are also under this class.
+
+Cooridinator class is the main entry for creating a coordinator in a distributed transaction system.
+
+### twopc.dao Structure
+SqlService.java & SqlServiceImpl.java are the interface and implementation classes of the SQL service, respectively, and they provide many SQL operations, such as deleting inventory and adding orders and updating logs in the database.
+
+### twopc.particitpant Structure
+InventoryServer.java and OrderServer.java are the starter classes for the Inventory service and the Order service, respectively. Server.java is the parent of these two classes, and they provide the socket connection to the coordinator and perform the 2pc algorithm process by calling ServerWorker.java.
+
+### twopc.utils Structure
+The DbUtils.java and SocketUtil.java utility classes are included in the twopc.utils package. SocketUtil.java provides the ability to read data from the input stream and write data to the output stream. dbUtils.java provides the ability to connect to a database.
+
+### twopc.resources Structure
+jdbc.properties stores the configuration of the database connection.
+
 ## Maintainers
 
 | Name         | Email                           |
 | ------------ | ------------------------------- |
-| wenhai huo   | wenhaih@student.unimelb.edu.au  |                            |
-| zeying zhang | zeying@student.unimelb.edu.au   |                            |
-| haowen shen  | haoshen@student.unimelb.edu.au  |                             |
+| wenhai huo   | wenhaih@student.unimelb.edu.au  |
+| zeying zhang | zeying@student.unimelb.edu.au   |
+| haowen shen  | haoshen@student.unimelb.edu.au  |
 | yuyang wang  | yuyawang@student.unimelb.edu.au |
