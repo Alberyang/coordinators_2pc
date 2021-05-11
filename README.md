@@ -190,20 +190,37 @@ actions respectively to make sure the data consistency of the whole system.
 
 
 ### twopc.coordinator Structure
+Coordinator package are consisted of a coordinator server and http shopping handler. IOThread is one of the componences
+of coordinator server which is designed to handle both http service and socket communications with other participants.
 
+ShoppingHandler contains the http service logic for user to buy a number of items. It is implemented with java jetty
+framework handling http request, and active the distributed transaction commit algorithm. A 2pc algorithm would be invoked 
+by accessing localhost:8001/shopping, while a simple showcase which didn't implement our algorithm would be preformed via
+localhost:8001/no_2pc.
+
+IOThread is a java class handling socket I/O with a new thread, which allows the coodinator to be accessed at anytime by
+a participant. All connected sockets would be recorded in the Coordinator server with the aim of furture 2pc algorithm
+implementation via socket message transfer.
+
+CoordinatorServer is the main java class of the coordinator. Both http service handler and 2pc sockets are taken over by
+coordinator server. Additionally, 2pc commit requests and 2pc rollback request are 
 
 
 ### twopc.dao Structure
 
 
 
-### twopc.particitpant Structure
+### twopc.participant Structure
 
 
 ### twopc.utils Structure
-DbUtils.java and SocketUtil.java are including in twopc.utils package. In this package, reading data from input stream 
-as well as write data to an output stream 
+DbUtils.java and SocketUtil.java are including in twopc.utils package. 
 
+In this package, static methods of reading data 
+from input stream as well as writing data to socket output stream are implemented in SocketUtil.java file. These two 
+methods allow coordinator and participants communicate with each other through a socket connection.
+
+DbUtils.java is a utiliy that involves MySQL connection and disconnection methods. 
 
 ## Maintainers
 
