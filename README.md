@@ -101,7 +101,7 @@ CREATE TABLE `orderLog` (
   UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 ```
-1. Modify database configuration information.
+1. Modify database configuration information in /resources/jdbc.properties.
 ```
 order=jdbc:mysql://localhost:3306/2pc_order
 inventory=jdbc:mysql://localhost:3306/2pc_inventory
