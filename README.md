@@ -101,7 +101,7 @@ CREATE TABLE `orderLog` (
   UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 ```
-1. Modify database configuration information in /resources/jdbc.properties.
+2. Modify database configuration information in /resources/jdbc.properties.
 ```
 order=jdbc:mysql://localhost:3306/2pc_order
 inventory=jdbc:mysql://localhost:3306/2pc_inventory
@@ -109,23 +109,23 @@ user=<your username>
 password=<your password>
 driver=com.mysql.cj.jdbc.Driver
 ```
-2. Start the Coordinator server. The default HTTP port of this server is 8001 and the default socket port is 9000.
+3. Start the Coordinator server. The default HTTP port of this server is 8001 and the default socket port is 9000.
 ```
 javac Coordinator.java
 java Coordinator
 ```
-3. Start the Order server. The default port of this server is 9001.
+4. Start the Order server. The default port of this server is 9001.
 ```
 javac OrderServer.java
 java OrderServer
 ```
-4. Start the Inventory server. The default port of this server is 9002.
+5. Start the Inventory server. The default port of this server is 9002.
 ```
 javac InventoryServer.java
 java InventoryServer
 ```
-5. Request the URL "http://localhost:8001/shopping" to use 2pc algorithm to handle the shopping transaction.
-6. Request the URL "http://localhost:8001/no_2pc" to simply handle the shopping transaction without 2pc algorithm.
+6. Request the URL "http://localhost:8001/shopping" to use 2pc algorithm to handle the shopping transaction.
+7. Request the URL "http://localhost:8001/no_2pc" to simply handle the shopping transaction without 2pc algorithm.
 
 ## System Architecture
 ### E-commerce Distributed Transaction Application
